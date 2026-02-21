@@ -1,17 +1,992 @@
 ---
-
+// Relicare — src/pages/index.astro
 ---
 
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relicare — UK Packaging EPR Submission Pack</title>
+  <meta name="description" content="We turn messy packaging data into an upload-ready submission file you can defend. Fixed scope, fixed price, no compliance jargon. Built for UK small producers." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0f1a14;
+      --ink-muted:  #4a5c50;
+      --ink-faint:  #8a9e90;
+      --paper:      #f5f2eb;
+      --paper-warm: #ede9df;
+      --green:      #1a6640;
+      --green-light:#2d8a58;
+      --green-pale: #e8f2ec;
+      --accent:     #c8602a;
+      --border:     #d4cec2;
+      --white:      #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(245,242,235,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--green);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--ink-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+    .nav-cta {
+      background: var(--green) !important;
+      color: var(--white) !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      font-weight: 600 !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--green-light) !important; }
+
+    /* HERO */
+    .hero {
+      padding: 140px 2rem 100px;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      min-height: 90vh;
+    }
+    .hero-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: var(--green-pale);
+      border: 1px solid #b8dcc4;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2px;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.6rem, 4.5vw, 3.8rem);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--green);
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--ink-muted);
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .hero-note {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+    }
+
+    /* BUTTONS */
+    .btn-primary {
+      background: var(--green);
+      color: var(--white);
+      padding: 0.85rem 1.8rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 2px solid var(--green);
+      transition: background 0.2s, transform 0.15s;
+      display: inline-block;
+    }
+    .btn-primary:hover {
+      background: var(--green-light);
+      border-color: var(--green-light);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink);
+      padding: 0.85rem 1.8rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      border: 2px solid var(--border);
+      transition: border-color 0.2s, color 0.2s;
+      display: inline-block;
+    }
+    .btn-secondary:hover { border-color: var(--ink-muted); color: var(--green); }
+    .btn-primary-light {
+      background: var(--paper);
+      color: var(--ink);
+      padding: 0.85rem 1.8rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 2px solid var(--paper);
+      transition: background 0.2s;
+      display: inline-block;
+    }
+    .btn-primary-light:hover { background: var(--paper-warm); }
+    .btn-ghost {
+      background: transparent;
+      color: #8a9e90;
+      padding: 0.85rem 1.8rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      border: 2px solid rgba(255,255,255,0.15);
+      transition: border-color 0.2s, color 0.2s;
+      display: inline-block;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.35); color: var(--paper); }
+
+    /* HERO CARD */
+    .hero-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 4px 24px rgba(15,26,20,0.08);
+      opacity: 0;
+      transform: translateY(24px);
+      animation: fadeUp 0.7s ease 0.3s forwards;
+    }
+    .hero-left {
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.1s forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card-header {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .deliverable-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .deliverable-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--ink-muted);
+    }
+    .check {
+      width: 18px;
+      height: 18px;
+      background: var(--green-pale);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .check::after {
+      content: '';
+      width: 6px;
+      height: 4px;
+      border-left: 2px solid var(--green);
+      border-bottom: 2px solid var(--green);
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+    .card-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+    .price-line { display: flex; justify-content: space-between; align-items: baseline; }
+    .price-label { font-size: 0.85rem; color: var(--ink-muted); }
+    .price-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      color: var(--ink);
+    }
+    .price-note { font-size: 0.75rem; color: var(--ink-faint); margin-top: 0.25rem; }
+
+    /* TRUST BAR */
+    .trust-bar {
+      background: var(--ink);
+      color: #a0b4a8;
+      padding: 1rem 2rem;
+      text-align: center;
+      font-size: 0.85rem;
+      letter-spacing: 0.02em;
+    }
+    .trust-bar strong { color: var(--paper); }
+
+    /* GENERAL */
+    section { padding: 5rem 2rem; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+    .section-intro {
+      font-size: 1.05rem;
+      color: var(--ink-muted);
+      max-width: 600px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* PROBLEM */
+    .problem-section { background: var(--ink); color: var(--paper); }
+    .problem-section .section-label { color: #6daa84; }
+    .problem-section .section-title { color: var(--paper); }
+    .problem-section .section-intro { color: #8a9e90; }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .problem-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      padding: 1.8rem;
+    }
+    .problem-card-icon { font-size: 1.6rem; margin-bottom: 1rem; }
+    .problem-card h3 { font-size: 1rem; font-weight: 600; color: var(--paper); margin-bottom: 0.6rem; }
+    .problem-card p { font-size: 0.88rem; color: #8a9e90; line-height: 1.6; }
+
+    /* PACKAGES */
+    .packages-section { background: var(--white); }
+    .sell-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .sell-card {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.8rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .sell-card:hover { border-color: var(--green); box-shadow: 0 4px 16px rgba(26,102,64,0.08); }
+    .sell-card.featured { border-color: var(--green); box-shadow: 0 4px 16px rgba(26,102,64,0.1); }
+    .sell-card-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: var(--green-pale);
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+      display: inline-block;
+      margin-bottom: 1rem;
+      align-self: flex-start;
+    }
+    .sell-card h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.3rem;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+    .sell-card .card-desc {
+      font-size: 0.88rem;
+      color: var(--ink-muted);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .sell-card-includes {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-bottom: 1.5rem;
+      flex: 1;
+    }
+    .sell-card-includes li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+    }
+    .sell-card-includes li::before {
+      content: '✓';
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+      font-size: 0.8rem;
+      margin-top: 1px;
+    }
+    .sell-card-price {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--ink);
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+    .sell-card-price span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+      font-weight: 400;
+    }
+    .packages-note { margin-top: 2rem; font-size: 0.85rem; color: var(--ink-faint); }
+    .packages-note a { color: var(--green); text-decoration: none; }
+
+    /* PROCESS */
+    .process-section { background: var(--paper); }
+    .process-steps { margin-top: 3rem; }
+    .process-step {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      gap: 1.5rem;
+      opacity: 0;
+      transform: translateX(-16px);
+      animation: fadeRight 0.5s ease forwards;
+    }
+    .process-step:nth-child(1) { animation-delay: 0.05s; }
+    .process-step:nth-child(2) { animation-delay: 0.12s; }
+    .process-step:nth-child(3) { animation-delay: 0.19s; }
+    .process-step:nth-child(4) { animation-delay: 0.26s; }
+    .process-step:nth-child(5) { animation-delay: 0.33s; }
+    @keyframes fadeRight { to { opacity: 1; transform: translateX(0); } }
+    .step-number-col { display: flex; flex-direction: column; align-items: center; }
+    .step-num {
+      width: 44px; height: 44px;
+      background: var(--green); color: var(--white);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .step-line { width: 2px; flex: 1; background: var(--border); margin-top: 6px; }
+    .process-step:last-child .step-line { display: none; }
+    .step-content { padding-bottom: 2.5rem; }
+    .process-step:last-child .step-content { padding-bottom: 0; }
+    .step-title { font-weight: 600; font-size: 1.05rem; color: var(--ink); margin-bottom: 0.5rem; }
+    .step-desc { font-size: 0.9rem; color: var(--ink-muted); line-height: 1.65; }
+    .step-outcome {
+      margin-top: 0.75rem;
+      padding: 0.6rem 0.9rem;
+      background: var(--green-pale);
+      border-left: 3px solid var(--green);
+      border-radius: 0 4px 4px 0;
+      font-size: 0.82rem;
+      color: var(--green);
+      font-weight: 500;
+    }
+    .process-full-link { margin-top: 2.5rem; font-size: 0.88rem; color: var(--ink-muted); }
+    .process-full-link a { color: var(--green); text-decoration: none; font-weight: 500; }
+    .process-full-link a:hover { text-decoration: underline; }
+
+    /* QA GATE */
+    .qa-section { background: var(--ink); }
+    .qa-section .section-label { color: #6daa84; }
+    .qa-section .section-title { color: var(--paper); }
+    .qa-section .section-intro { color: #8a9e90; }
+    .qa-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+      align-items: start;
+    }
+    .qa-checklist { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .qa-checklist li {
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      font-size: 0.88rem; color: #a0b4a8; line-height: 1.5;
+    }
+    .qa-check {
+      width: 20px; height: 20px;
+      border: 1px solid #2d8a58;
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .qa-check::after {
+      content: '';
+      width: 7px; height: 5px;
+      border-left: 2px solid #6daa84;
+      border-bottom: 2px solid #6daa84;
+      transform: rotate(-45deg) translateY(-1px);
+      display: block;
+    }
+    .qa-guarantee {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      padding: 2rem;
+    }
+    .qa-guarantee h3 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--paper); margin-bottom: 1rem; }
+    .qa-guarantee p { font-size: 0.88rem; color: #8a9e90; line-height: 1.65; margin-bottom: 1rem; }
+    .qa-guarantee p:last-child { margin-bottom: 0; }
+    .qa-not-covered { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid rgba(255,255,255,0.08); }
+    .qa-not-covered p { font-size: 0.78rem; color: #4a5c50; margin-bottom: 0; }
+
+    /* WHO */
+    .who-section { background: var(--paper-warm); }
+    .who-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 3rem;
+      align-items: start;
+    }
+    .who-profiles {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .who-profiles-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 1rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .who-profiles .profile-card {
+      border: none;
+      border-radius: 0;
+      padding: 0.9rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .who-profiles .profile-card:last-child { border-bottom: none; padding-bottom: 0; }
+    .profile-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.4rem;
+    }
+    .profile-card h4 { font-weight: 600; font-size: 0.95rem; color: var(--ink); margin-bottom: 0.3rem; }
+    .profile-card p { font-size: 0.85rem; color: var(--ink-muted); }
+    .who-not {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.8rem;
+    }
+    .who-not h3 { font-weight: 600; font-size: 1rem; color: var(--ink); margin-bottom: 1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border); }
+    .not-list { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+    .not-list li { display: flex; gap: 0.6rem; font-size: 0.88rem; color: var(--ink-muted); }
+    .not-list li::before { content: '\2715'; color: var(--accent); font-size: 0.8rem; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+    .who-not-note { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--ink-muted); line-height: 1.6; }
+    .who-not-note a { color: var(--green); font-weight: 500; text-decoration: none; }
+
+    /* TURNAROUND */
+    .turnaround-section { background: var(--white); padding: 3rem 2rem; }
+    .turnaround-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .turnaround-card { border: 1px solid var(--border); border-radius: 6px; padding: 1.5rem; }
+    .turnaround-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 0.4rem; }
+    .turnaround-days { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--ink); margin-bottom: 0.3rem; }
+    .turnaround-note { font-size: 0.82rem; color: var(--ink-muted); }
+
+    /* CTA */
+    .cta-section { background: var(--ink); text-align: center; padding: 6rem 2rem; }
+    .cta-section .section-label { color: #6daa84; }
+    .cta-section h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      color: var(--paper);
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    .cta-section p { font-size: 1.05rem; color: #8a9e90; max-width: 520px; margin: 0 auto 2.5rem; line-height: 1.7; }
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* FOOTER */
+    footer { background: var(--ink); border-top: 1px solid rgba(255,255,255,0.06); padding: 2rem; text-align: center; }
+    footer p { font-size: 0.8rem; color: #4a5c50; line-height: 1.8; }
+    footer a { color: #6daa84; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; gap: 2.5rem; min-height: auto; }
+      .problem-grid { grid-template-columns: 1fr; }
+      .sell-cards { grid-template-columns: 1fr; }
+      .qa-grid { grid-template-columns: 1fr; }
+      .who-grid { grid-template-columns: 1fr; }
+      .turnaround-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      .process-step { grid-template-columns: 44px 1fr; gap: 1rem; }
+      section { padding: 3.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">Relicare</a>
+  <ul class="nav-links">
+    <li><a href="#how-it-works">How it works</a></li>
+    <li><a href="#packages">Pricing</a></li>
+    <li><a href="/explainer">What is EPR?</a></li>
+    <li><a href="/eligibility-check" class="nav-cta">Check eligibility</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section style="padding: 0; background: var(--paper);">
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-label">UK Packaging EPR</div>
+      <h1>A packaging EPR submission file you can <em>actually defend.</em></h1>
+      <p class="hero-sub">
+        We take UK small producers from messy packaging data to an upload-ready, evidence-backed
+        submission — fixed scope, fixed price, no compliance jargon. This is not consulting hours.
+        It is a fixed deliverable.
+      </p>
+      <div class="hero-actions">
+        <a href="/eligibility-check" class="btn-primary">Check your reporting obligation &rarr;</a>
+        <a href="#how-it-works" class="btn-secondary">See how it works</a>
+      </div>
+      <p class="hero-note">2-minute quiz &mdash; routes you to the right package instantly</p>
+    </div>
+
+    <div class="hero-card">
+      <div class="card-header">What you receive</div>
+      <ul class="deliverable-list">
+        <li>
+          <span class="check"></span>
+          <span>Upload-ready <code>packaging_data</code> CSV, built to the 15-column GOV.UK specification</span>
+        </li>
+        <li>
+          <span class="check"></span>
+          <span>Evidence &amp; Assumptions Summary &mdash; full audit trail of every source and estimate</span>
+        </li>
+        <li>
+          <span class="check"></span>
+          <span>Approved person sign-off step before anything is submitted</span>
+        </li>
+        <li>
+          <span class="check"></span>
+          <span>Live submission support &mdash; we guide the upload and troubleshoot portal errors in real time</span>
+        </li>
+        <li>
+          <span class="check"></span>
+          <span>Submission proof saved for your compliance records</span>
+        </li>
+      </ul>
+      <hr class="card-divider" />
+      <div class="price-line">
+        <span class="price-label">Fixed price from</span>
+        <span class="price-value">&#163;900 <span style="font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:400;color:var(--ink-faint);">+ VAT</span></span>
+      </div>
+      <p class="price-note">No hourly billing. No scope creep. One fixed deliverable.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  Built for <strong>UK small producers</strong> reporting under the Extended Producer Responsibility regulations &mdash;
+  D2C brands, importers, food &amp; drink, cosmetics, home goods.
+</div>
+
+<!-- PROBLEM -->
+<section class="problem-section">
+  <div class="container">
+    <div class="section-label">The problem</div>
+    <h2 class="section-title">This reporting is not paperwork. It is structured data work.</h2>
+    <p class="section-intro">
+      Most small producers don't have a compliance team. They have a deadline, an inbox full of
+      confusing guidance, and packaging data spread across suppliers, 3PLs, and spreadsheets.
+      You don't need a platform to onboard. You need this built properly.
+    </p>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-card-icon">&#128230;</div>
+        <h3>Weights live outside your business</h3>
+        <p>Packaging specifications sit with your suppliers and 3PLs. Getting them requires knowing what to ask for &mdash; and chasing until you have an answer.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-card-icon">&#128194;</div>
+        <h3>The file rules are unforgiving</h3>
+        <p>The government's CSV has 15 columns, specific codes, and zero tolerance for formatting errors. One wrong field and the portal rejects the upload.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-card-icon">&#9201;</div>
+        <h3>Deadlines punish "we'll sort it later"</h3>
+        <p>Late or incorrect submissions carry enforcement risk. The time to find errors is before you upload &mdash; and the deadline doesn't move.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PACKAGES -->
+<section class="packages-section" id="packages">
+  <div class="container">
+    <div class="section-label">Packages</div>
+    <h2 class="section-title">Fixed scope. Clear outputs. No vague consulting hours.</h2>
+    <p class="section-intro">
+      The eligibility quiz routes you to the right package based on your obligation and data complexity.
+      You never pay for more than you need.
+    </p>
+    <div class="sell-cards">
+      <div class="sell-card">
+        <span class="sell-card-tag">If obligation is unclear</span>
+        <h3>Eligibility Assessment</h3>
+        <p class="card-desc">Not sure whether you need to report, or whether you're a small or large producer? Start here before committing to a submission pack.</p>
+        <ul class="sell-card-includes">
+          <li>Written routing outcome</li>
+          <li>Clear what to report / what not to report</li>
+          <li>Input checklist for the next stage</li>
+          <li>Creditable against a Full Pack within 14 days</li>
+        </ul>
+        <div class="sell-card-price">&#163;150&ndash;350 <span>+ VAT</span></div>
+      </div>
+
+      <div class="sell-card featured">
+        <span class="sell-card-tag">Most common route</span>
+        <h3>Full Submission Pack</h3>
+        <p class="card-desc">Your data is messy or missing. We build the BOM, chase specs, aggregate, and deliver the complete submission pack.</p>
+        <ul class="sell-card-includes">
+          <li>Scope confirmation</li>
+          <li>Full BOM build + spec chase (up to 2 suppliers &amp; 1 3PL)</li>
+          <li>Aggregation to required reporting format</li>
+          <li>Non-negotiable QA Gate</li>
+          <li>Upload-ready CSV + Evidence &amp; Assumptions Summary</li>
+          <li>Approved person sign-off step</li>
+          <li>Live submission support &amp; proof</li>
+        </ul>
+        <div class="sell-card-price">&#163;900&ndash;1,900 <span>+ VAT</span></div>
+      </div>
+
+      <div class="sell-card">
+        <span class="sell-card-tag">If your totals are clean</span>
+        <h3>Format-Only Pack</h3>
+        <p class="card-desc">You already have totals by material, class, and activity. We format, QA, produce the evidence summary, and support the upload.</p>
+        <ul class="sell-card-includes">
+          <li>File formatting to specification</li>
+          <li>Non-negotiable QA Gate</li>
+          <li>Evidence &amp; Assumptions Summary</li>
+          <li>Approved person sign-off step</li>
+          <li>Live submission support</li>
+        </ul>
+        <div class="sell-card-price">&#163;300&ndash;700 <span>+ VAT</span></div>
+      </div>
+    </div>
+    <p class="packages-note">
+      Add-ons available for extra suppliers, measurement support, or rush turnaround. &nbsp;
+      <a href="/eligibility-check">Take the quiz to get an exact quote &rarr;</a>
+    </p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="process-section" id="how-it-works">
+  <div class="container">
+    <div class="section-label">Process</div>
+    <h2 class="section-title">What we actually do.</h2>
+    <p class="section-intro">
+      Five controlled steps from intake to submission proof. You handle the business; we handle the compliance engineering.
+    </p>
+
+    <div class="process-steps">
+      <div class="process-step">
+        <div class="step-number-col">
+          <div class="step-num">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Confirm scope &amp; collect inputs</div>
+          <div class="step-desc">We confirm your reporting position, identify the relevant deadline, and check for HDC or importer considerations. You provide your SKU list, aggregated annual units, packing workflow summary, and supplier/3PL contacts. We do not ask for customer-level order data.</div>
+          <div class="step-outcome">✓ Outcome: Clear definition of what needs to be reported &mdash; and what does not.</div>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number-col">
+          <div class="step-num">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Build the packaging BOM &amp; chase specs</div>
+          <div class="step-desc">For every SKU, we identify packaging components, assign activity codes, map materials to valid EPR categories, and record weights. With your permission, we contact your suppliers directly. If specs are unavailable, we apply a structured measurement protocol and log every estimate.</div>
+          <div class="step-outcome">✓ Outcome: A structured packaging Bill of Materials with full evidence sources &mdash; not a guess.</div>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number-col">
+          <div class="step-num">3</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Aggregate &amp; run the QA Gate</div>
+          <div class="step-desc">We aggregate totals by packaging activity, type, class, material, and country &mdash; converting to whole kilograms as required. Before export, we run our non-negotiable QA checklist: all 15 headers, no blank rows, no zero-weight rows, field logic, and a plausibility check against your shipped units.</div>
+          <div class="step-outcome">✓ Outcome: A submission-ready file built to pass portal validation on first upload.</div>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number-col">
+          <div class="step-num">4</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Deliverables &amp; approved person sign-off</div>
+          <div class="step-desc">You receive the upload-ready <code>packaging_data</code> CSV and the Evidence &amp; Assumptions Summary. Before anything is submitted, your approved person reviews and confirms the data and assumptions. This creates a clean, documented responsibility boundary.</div>
+          <div class="step-outcome">✓ Outcome: Submission authorised by the right person, on record.</div>
+        </div>
+      </div>
+
+      <div class="process-step">
+        <div class="step-number-col">
+          <div class="step-num">5</div>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Submission support &amp; close-out</div>
+          <div class="step-desc">You log into the RPD portal &mdash; we guide the upload in real time. If the portal throws errors, we troubleshoot and re-export on the spot. We save submission proof and give you practical recommendations to reduce next year's effort. BOM maintenance retainer available to keep things current.</div>
+          <div class="step-outcome">✓ Outcome: Submission confirmed. Not just prepared &mdash; submitted.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="process-full-link">
+      Want the full nine-step breakdown?
+      <a href="/how-it-works">Read the complete process &rarr;</a>
+    </p>
+  </div>
+</section>
+
+<!-- QA GATE -->
+<section class="qa-section">
+  <div class="container">
+    <div class="section-label">Quality gate</div>
+    <h2 class="section-title">Upload failures are predictable. We treat them as preventable.</h2>
+    <p class="section-intro">
+      Before we export anything, every file passes a structured checklist. These are the exact failure modes that cause portal rejections &mdash; we catch them before you ever log in.
+    </p>
+
+    <div class="qa-grid">
+      <ul class="qa-checklist">
+        <li><span class="qa-check"></span><span>All 15 required column headers present and in the correct order</span></li>
+        <li><span class="qa-check"></span><span>Header row is the first row; data begins immediately after</span></li>
+        <li><span class="qa-check"></span><span>No blank rows anywhere in the file</span></li>
+        <li><span class="qa-check"></span><span>No zero-weight rows &mdash; deleted before export</span></li>
+        <li><span class="qa-check"></span><span>No extra columns beyond the 15 required</span></li>
+        <li><span class="qa-check"></span><span>Weights in whole-number kilograms &mdash; no decimals</span></li>
+        <li><span class="qa-check"></span><span>SP row logic correctly applied (packaging_type, organisation_size, packaging_class)</span></li>
+        <li><span class="qa-check"></span><span>HDC row logic correctly applied where applicable</span></li>
+        <li><span class="qa-check"></span><span>Plausibility check against annual units shipped/sold</span></li>
+        <li><span class="qa-check"></span><span>File exported as CSV &mdash; not .xlsx</span></li>
+      </ul>
+
+      <div class="qa-guarantee">
+        <h3>Our structural guarantee</h3>
+        <p>
+          We guarantee that the <code>packaging_data</code> CSV we deliver will be structured to the
+          current file specification and will upload successfully in the RPD portal when used as instructed.
+        </p>
+        <p>
+          If the upload fails due to a formatting or structure issue introduced by us, we will correct
+          and re-issue the file within 24 hours at no additional charge.
+        </p>
+        <div class="qa-not-covered">
+          <p>Does not cover incorrect or incomplete client inputs, government requirement changes after delivery, or regulatory enforcement matters. Estimated values are documented and require approved person sign-off before submission.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO -->
+<section class="who-section" id="who">
+  <div class="container">
+    <div class="section-label">Who it's for</div>
+    <h2 class="section-title">Built for small producers without a compliance team.</h2>
+    <p class="section-intro">
+      If you place packaged goods on the UK market and meet the small producer threshold,
+      you likely need to report. Here's who we work with &mdash; and who we don't.
+    </p>
+
+    <div class="who-grid">
+      <div class="who-profiles">
+        <div class="who-profiles-label">We are a good fit for</div>
+        <div class="profile-card">
+          <h4>D2C e-commerce brands</h4>
+          <p>Shopify or Amazon sellers shipping product in their own branded packaging.</p>
+        </div>
+        <div class="profile-card">
+          <h4>Small importers</h4>
+          <p>Businesses importing packaged goods from overseas for sale on the UK market.</p>
+        </div>
+        <div class="profile-card">
+          <h4>Food, drink &amp; FMCG brands</h4>
+          <p>Producers with multiple SKUs, varied packaging formats, and potential HDC obligations.</p>
+        </div>
+        <div class="profile-card">
+          <h4>Cosmetics &amp; home goods</h4>
+          <p>Brands with complex, multi-component packaging across a product range.</p>
+        </div>
+      </div>
+
+      <div class="who-not">
+        <h3>What we are not</h3>
+        <ul class="not-list">
+          <li>We are not a compliance scheme and do not provide scheme registration or membership.</li>
+          <li>We do not provide legal advice or represent clients in enforcement actions.</li>
+          <li>We do not advise on packaging redesign or promise to minimise your EPR fees.</li>
+          <li>Large-producer, multi-entity complexity is outside standard scope unless explicitly agreed in writing.</li>
+        </ul>
+        <div class="who-not-note">
+          Not sure if you qualify as a small producer? Use our <a href="/eligibility-check">eligibility checker</a> &mdash;
+          or if your situation is complex, ask about our paid eligibility assessment.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TURNAROUND -->
+<section class="turnaround-section">
+  <div class="container">
+    <div class="section-label">Turnaround</div>
+    <div class="turnaround-grid">
+      <div class="turnaround-card">
+        <div class="turnaround-label">Standard</div>
+        <div class="turnaround-days">5&ndash;10 working days</div>
+        <div class="turnaround-note">When you're 45+ days before the deadline. Recommended.</div>
+      </div>
+      <div class="turnaround-card">
+        <div class="turnaround-label">Late</div>
+        <div class="turnaround-days">3&ndash;5 working days</div>
+        <div class="turnaround-note">15&ndash;44 days before deadline. Subject to capacity.</div>
+      </div>
+      <div class="turnaround-card">
+        <div class="turnaround-label">Rush</div>
+        <div class="turnaround-days">48&ndash;72 hours</div>
+        <div class="turnaround-note">Under 15 days only. Rush fee applies. Enquire first.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+  <div class="container">
+    <div class="section-label">Get started</div>
+    <h2>Deadline-driven? So are we.</h2>
+    <p>
+      Check whether you qualify in two minutes. If you do, we confirm scope and get moving &mdash;
+      before the deadline becomes a problem.
+    </p>
+    <div class="cta-actions">
+      <a href="/eligibility-check" class="btn-primary-light">Check your reporting obligation &rarr;</a>
+      <a href="/explainer" class="btn-ghost">Learn about EPR first</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    &copy; 2026 Relicare &mdash; UK Packaging EPR Submission Specialists<br />
+    <a href="/explainer">What is EPR?</a> &middot;
+    <a href="/eligibility-check">Eligibility checker</a> &middot;
+    <a href="#how-it-works">How it works</a> &middot;
+    <a href="#packages">Pricing</a>
+  </p>
+  <p style="margin-top:0.75rem;font-size:0.75rem;color:#2a3a30;">
+    We are an independent specialist service provider. We are not a registered compliance scheme. We do not provide legal advice.
+  </p>
+</footer>
+
+</body>
 </html>

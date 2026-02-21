@@ -1,0 +1,1563 @@
+---
+// src/pages/eligibility-check.astro
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eligibility + Instant Quote | Relicare</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0f1a14;
+      --ink-muted:  #4a5c50;
+      --ink-faint:  #8a9e90;
+      --paper:      #f5f2eb;
+      --paper-warm: #ede9df;
+      --green:      #1a6640;
+      --green-light:#2d8a58;
+      --green-pale: #e8f2ec;
+      --accent:     #c8602a;
+      --border:     #d4cec2;
+      --white:      #ffffff;
+      --warn-bg:    #fffbeb;
+      --warn-line:  #f59e0b;
+      --info-bg:    #eff6ff;
+      --info-line:  #3b82f6;
+      --danger-bg:  #fef2f2;
+      --danger-line:#ef4444;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(245,242,235,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--green);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--ink-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+    .nav-cta {
+      background: var(--green) !important;
+      color: var(--white) !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      font-weight: 600 !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--green-light) !important; }
+
+    /* ── LAYOUT ── */
+    .wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 96px 1.5rem 4rem;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .page-header-text {}
+    .page-kicker {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green);
+      background: var(--green-pale);
+      border: 1px solid #b8dcc4;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2px;
+      margin-bottom: 0.75rem;
+    }
+    .page-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+    .page-sub {
+      font-size: 0.9rem;
+      color: var(--ink-muted);
+      max-width: 520px;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      margin-bottom: 1.5rem;
+    }
+      margin-bottom: 0.4rem;
+    }
+    .progress-track {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── GLOBAL MESSAGE ── */
+    #globalMsg {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      border-left: 3px solid;
+      font-size: 0.88rem;
+    }
+    #globalMsg.warn  { background: var(--warn-bg);   border-left-color: var(--warn-line); }
+    #globalMsg.info  { background: var(--info-bg);   border-left-color: var(--info-line); }
+    #globalMsg.danger{ background: var(--danger-bg); border-left-color: var(--danger-line); }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 12px rgba(15,26,20,0.05);
+    }
+
+    /* ── SECTION LABEL + TITLE inside card ── */
+    .step-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+    .step-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    /* ── DIVIDER ── */
+    .hr {
+      height: 1px;
+      background: var(--border);
+      margin: 1.5rem 0;
+    }
+
+    /* ── QUESTION BLOCK ── */
+    .q-block { margin-bottom: 0; }
+    .q-label {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .q-what {
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+      line-height: 1.55;
+      margin-bottom: 0.9rem;
+      padding: 0.65rem 0.9rem;
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+    .q-what ul { margin: 0.4rem 0 0 1.1rem; }
+    .q-what li { margin-bottom: 0.2rem; }
+
+    /* ── CHOICE GRID ── */
+    .choice-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .choice-grid.two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    /* ── CHOICE ITEM ── */
+    .choice {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      background: var(--white);
+      transition: border-color 0.15s, background 0.15s;
+      font-size: 0.9rem;
+    }
+    .choice:hover {
+      border-color: var(--green-light);
+      background: var(--green-pale);
+    }
+    .choice input[type="radio"],
+    .choice input[type="checkbox"] {
+      accent-color: var(--green);
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      margin: 0;
+      cursor: pointer;
+    }
+    .choice-text { flex: 1; }
+    .choice-main { font-weight: 500; color: var(--ink); display: block; }
+    .choice-hint { font-size: 0.8rem; color: var(--ink-muted); margin-top: 0.15rem; display: block; line-height: 1.4; }
+
+    /* Selected state via JS — not needed for native radio but nice for checkboxes */
+    .choice:has(input:checked) {
+      border-color: var(--green);
+      background: var(--green-pale);
+    }
+
+    /* ── TWO-COL ROW (turnover/tonnage) ── */
+    .two-col-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 600px) {
+      .two-col-row { grid-template-columns: 1fr; }
+      .choice-grid.two-col { grid-template-columns: 1fr; }
+    }
+
+    /* ── INLINE MESSAGES ── */
+    .msg {
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      border-left: 3px solid;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-top: 1rem;
+    }
+    .msg.warn   { background: var(--warn-bg);   border-left-color: var(--warn-line); }
+    .msg.info   { background: var(--info-bg);   border-left-color: var(--info-line); }
+    .msg.danger { background: var(--danger-bg); border-left-color: var(--danger-line); }
+    .msg strong { display: block; margin-bottom: 0.25rem; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .msg ul { margin: 0.4rem 0 0 1.1rem; }
+    .msg li { margin-bottom: 0.2rem; }
+
+    /* ── RESULT PILL ── */
+    .result-pill {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 2px;
+      margin-bottom: 0.5rem;
+      margin-right: 0.4rem;
+    }
+    .result-pill.green  { background: var(--green-pale); color: var(--green); border: 1px solid #b8dcc4; }
+    .result-pill.amber  { background: var(--warn-bg);   color: #92400e;      border: 1px solid var(--warn-line); }
+    .result-pill.blue   { background: var(--info-bg);   color: #1e40af;      border: 1px solid var(--info-line); }
+    .result-pill.plain  { background: var(--paper);     color: var(--ink-muted); border: 1px solid var(--border); }
+
+    .result-heading {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: var(--ink);
+      margin: 0.75rem 0 0.5rem;
+      line-height: 1.2;
+    }
+    .result-sub {
+      font-size: 0.9rem;
+      color: var(--ink-muted);
+      line-height: 1.6;
+    }
+
+    /* ── PRICE BOX ── */
+    .price-box {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.25rem 1.5rem;
+      margin-top: 1.25rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .price-box-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+    .price-box-value {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      color: var(--ink);
+    }
+    .price-box-note {
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+    }
+
+    /* ── SECTION DIVIDER inside result ── */
+    .rec-section {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .rec-section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.6rem;
+    }
+    .rec-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .rec-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      color: var(--ink-muted);
+    }
+    .rec-list li::before {
+      content: '→';
+      color: var(--green);
+      flex-shrink: 0;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    /* ── NAV BUTTONS ── */
+    .nav-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: var(--white);
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      border: 2px solid var(--green);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary:hover {
+      background: var(--green-light);
+      border-color: var(--green-light);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--ink);
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-secondary:hover { border-color: var(--ink-muted); color: var(--green); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--ink-muted);
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      border: 2px solid var(--border);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-ghost:hover { border-color: var(--ink-muted); color: var(--ink); }
+
+    /* ── FORM FIELDS ── */
+    label.field { display: grid; gap: 0.4rem; margin-top: 1rem; }
+    label.field .q-label { margin-bottom: 0; }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font: inherit;
+      font-size: 0.9rem;
+      background: var(--white);
+      color: var(--ink);
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(26,102,64,0.08);
+    }
+    textarea { min-height: 90px; resize: vertical; }
+
+    .tiny {
+      font-size: 0.78rem;
+      color: var(--ink-faint);
+      line-height: 1.5;
+      margin-top: 0.75rem;
+    }
+    .tiny ul { margin: 0.4rem 0 0 1rem; }
+    .tiny li { margin-bottom: 0.2rem; }
+
+    [hidden] { display: none !important; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--ink);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 2rem;
+      text-align: center;
+      margin-top: 4rem;
+    }
+    footer p { font-size: 0.8rem; color: #4a5c50; line-height: 1.8; }
+    footer a { color: #6daa84; text-decoration: none; }
+
+    @media (max-width: 700px) {
+      .nav-links { display: none; }
+      .wrap { padding: 84px 1rem 3rem; }
+      .card { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">Relicare</a>
+  <ul class="nav-links">
+    <li><a href="/#how-it-works">How it works</a></li>
+    <li><a href="/#packages">Pricing</a></li>
+    <li><a href="/explainer">What is EPR?</a></li>
+    <li><a href="/eligibility-check" class="nav-cta">Check eligibility</a></li>
+  </ul>
+</nav>
+
+<div class="wrap">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-text">
+      <div class="page-kicker">UK Packaging EPR</div>
+      <h1 class="page-title">Eligibility &amp; instant quote</h1>
+      <p class="page-sub">Based on your answers and current GOV.UK guidance. Indicative only — does not replace formal legal advice.</p>
+    </div>
+    <button class="btn-ghost" id="startAgainTop">Start again</button>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+  
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+  </div>
+
+  <div id="globalMsg" class="msg warn" hidden></div>
+
+  <!-- ══════════════════════════════════════════
+       STEP 1 — ORGANISATION BASICS
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="1">
+
+    <h2 class="step-title">Organisation basics</h2>
+
+    <div class="q-block">
+      <span class="q-label">Is your organisation established in the United Kingdom?</span>
+      <div class="q-what">"Established" means a real operating presence in the UK — registered office, branch, warehouse, or a UK business address used for operations. If you have no UK presence and only sell into the UK from abroad, choose No.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="ukEstablished" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+        <label class="choice"><input type="radio" name="ukEstablished" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+        <label class="choice"><input type="radio" name="ukEstablished" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Are you a registered charity?</span>
+      <div class="q-what">You are registered as a charity (not just mission-led). Charities are generally exempt from producer obligations and fees — but charity reprocessors/exporters are different.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="isCharity" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+        <label class="choice"><input type="radio" name="isCharity" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Do you act as a reprocessor or exporter of packaging waste?</span>
+      <div class="q-what">You handle packaging waste for recycling/recovery/export (not just selling packaged products). This can create different obligations.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="reprocessorExporter" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+        <label class="choice"><input type="radio" name="reprocessorExporter" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+        <label class="choice"><input type="radio" name="reprocessorExporter" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Are you answering on behalf of one legally registered company?</span>
+      <div class="q-what">This is about whether you are one legal entity versus a parent/subsidiary group. Group structures can change how thresholds and responsibilities are assessed.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="groupStructure" value="one_company" /><span class="choice-text"><span class="choice-main">Yes — one company only</span></span></label>
+        <label class="choice"><input type="radio" name="groupStructure" value="parent" /><span class="choice-text"><span class="choice-main">Parent company (group)</span></span></label>
+        <label class="choice"><input type="radio" name="groupStructure" value="subsidiary" /><span class="choice-text"><span class="choice-main">Subsidiary</span></span></label>
+        <label class="choice"><input type="radio" name="groupStructure" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-primary" data-next>Continue &rarr;</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STEP 2 — PACKAGING ACTIVITIES
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="2" hidden>
+
+    <h2 class="step-title">Packaging activities</h2>
+
+    <div class="q-block">
+      <span class="q-label">Which activities apply to you for packaged goods supplied in the UK? Select all that apply.</span>
+      <div class="q-what">These are the activities GOV.UK uses to determine whether you're potentially responsible. If you pay another organisation to manufacture, pack, or import goods under your brand, you may still be responsible.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="checkbox" name="activities" value="own_brand" /><span class="choice-text"><span class="choice-main">Supply packaged goods under your own brand</span><span class="choice-hint">Goods sold under your brand name/trademark, even if others manufacture or import them for you.</span></span></label>
+        <label class="choice"><input type="checkbox" name="activities" value="third_party_under_brand" /><span class="choice-text"><span class="choice-main">A third party manufactures, packs, or imports goods under your brand on your behalf</span><span class="choice-hint">You may still be responsible even if you don't physically pack/import the goods yourself.</span></span></label>
+        <label class="choice"><input type="checkbox" name="activities" value="pack_fill" /><span class="choice-text"><span class="choice-main">Pack or fill goods into packaging (for yourself or others)</span></span></label>
+        <label class="choice"><input type="checkbox" name="activities" value="import" /><span class="choice-text"><span class="choice-main">Import packaged goods into the UK (or become the "first UK owner")</span></span></label>
+        <label class="choice"><input type="checkbox" name="activities" value="empty_packaging" /><span class="choice-text"><span class="choice-main">Supply empty packaging</span></span></label>
+        <label class="choice"><input type="checkbox" name="activities" value="hire_loan" /><span class="choice-text"><span class="choice-main">Hire / loan reusable packaging (e.g. pallets, crates)</span></span></label>
+        <label class="choice"><input type="checkbox" name="activities" value="marketplace" /><span class="choice-text"><span class="choice-main">Own an online marketplace that allows non-UK sellers to sell into the UK</span><span class="choice-hint">If you only sell goods from UK organisations, this usually does not count.</span></span></label>
+        <label class="choice"><input type="checkbox" name="activities" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div id="activityNoneMsg" class="msg warn" hidden>
+      <strong>Scope warning</strong>
+      You did not select any packaging activity. Based on GOV.UK guidance, you're likely out of scope — but if you're unsure, an eligibility assessment is safer than guessing.
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-primary" data-next>Continue &rarr;</button>
+      <button class="btn-secondary" data-back>Back</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STEP 3 — EXTRA CHECKS
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="3" hidden>
+
+    <h2 class="step-title">Extra checks</h2>
+    <div class="q-what" style="margin-bottom:1.5rem;">GOV.UK highlights a few edge cases where responsibility can shift between parties. We ask these to avoid misclassifying you.</div>
+
+    <!-- IMPORTER BLOCK -->
+    <div id="importBlock" hidden>
+      <div class="step-label" style="color:var(--ink-muted);margin-bottom:0.75rem;">Importer checks</div>
+
+      <div class="q-block">
+        <span class="q-label">Are the imported goods branded with:</span>
+        <div class="q-what">"Branded" refers to the brand name/trademark on the goods/packaging. Brand ownership and UK establishment can affect who is responsible.</div>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="importBrand" value="our_brand" /><span class="choice-text"><span class="choice-main">Our brand</span></span></label>
+          <label class="choice"><input type="radio" name="importBrand" value="another_uk_brand" /><span class="choice-text"><span class="choice-main">Another UK brand</span></span></label>
+          <label class="choice"><input type="radio" name="importBrand" value="overseas_brand" /><span class="choice-text"><span class="choice-main">An overseas brand</span></span></label>
+          <label class="choice"><input type="radio" name="importBrand" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="q-block">
+        <span class="q-label">Are you importing on behalf of a UK-established brand owner (their brand, not yours)?</span>
+        <div class="q-what">You are effectively acting as an import/logistics agent for a UK brand owner. GOV.UK says you may not need to take action in some "importing on behalf" scenarios.</div>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="importOnBehalf" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+          <label class="choice"><input type="radio" name="importOnBehalf" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+          <label class="choice"><input type="radio" name="importOnBehalf" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="q-block">
+        <span class="q-label">Do you sell imported goods that were packed or filled by a UK third party for a company not established in the UK?</span>
+        <div class="q-what">GOV.UK explicitly calls this out as a scenario where you may need to take action.</div>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="importUKThirdPartyOverseas" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+          <label class="choice"><input type="radio" name="importUKThirdPartyOverseas" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+          <label class="choice"><input type="radio" name="importUKThirdPartyOverseas" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="q-block">
+        <span class="q-label">Do you ever discard packaging before selling the goods?</span>
+        <div class="q-what">Removing/discarding outer cartons, transit packaging, protective packaging, etc. GOV.UK says you may still need to take action even if you discard packaging before sale.</div>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="discardBeforeSell" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+          <label class="choice"><input type="radio" name="discardBeforeSell" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+          <label class="choice"><input type="radio" name="discardBeforeSell" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+    </div>
+
+    <!-- PACK/FILL BLOCK -->
+    <div id="packFillBlock" hidden>
+      <div class="step-label" style="color:var(--ink-muted);margin-bottom:0.75rem;">Pack / fill checks</div>
+
+      <div class="q-block">
+        <span class="q-label">Do you pack/fill mainly for a brand owner established in the UK?</span>
+        <div class="q-what">You are a contract packer/fulfilment site packing goods that will be sold under someone else's brand.</div>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="packForUKBrandOwner" value="yes_mostly" /><span class="choice-text"><span class="choice-main">Yes (mostly)</span></span></label>
+          <label class="choice"><input type="radio" name="packForUKBrandOwner" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+          <label class="choice"><input type="radio" name="packForUKBrandOwner" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="q-block">
+        <span class="q-label">Is that brand owner a large organisation (to the best of your knowledge)?</span>
+        <div class="q-what">"Large" is defined in GOV.UK guidance using turnover and tonnage. If unsure, choose "Not sure" and we'll route you to an assessment.</div>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="brandOwnerLarge" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+          <label class="choice"><input type="radio" name="brandOwnerLarge" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+          <label class="choice"><input type="radio" name="brandOwnerLarge" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+    </div>
+
+    <!-- EMPTY PACKAGING BLOCK -->
+    <div id="emptyPackagingBlock" hidden>
+      <div class="step-label" style="color:var(--ink-muted);margin-bottom:0.75rem;">Empty packaging checks</div>
+
+      <div class="q-block">
+        <span class="q-label">Who do you mainly supply empty packaging to?</span>
+        <div class="q-what">GOV.UK's "supply empty packaging" responsibility can depend on whether the customer is a large organisation and whether they fill the packaging.</div>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="emptyPackagingCustomer" value="mainly_small_or_nonlarge" /><span class="choice-text"><span class="choice-main">Mainly small / non-large businesses (they fill it)</span></span></label>
+          <label class="choice"><input type="radio" name="emptyPackagingCustomer" value="mainly_large_they_fill" /><span class="choice-text"><span class="choice-main">Mainly large organisations (they fill it)</span></span></label>
+          <label class="choice"><input type="radio" name="emptyPackagingCustomer" value="large_not_filling" /><span class="choice-text"><span class="choice-main">Large organisations that do not fill it</span></span></label>
+          <label class="choice"><input type="radio" name="emptyPackagingCustomer" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+    </div>
+
+    <!-- REUSABLE NOTE -->
+    <div id="reusableNote" hidden>
+      <div class="msg info">
+        <strong>Reusable packaging note</strong>
+        Hiring/loaning reusable packaging can increase reporting complexity. We can still quote, but may recommend a fuller service tier depending on your answers.
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-primary" data-next>Continue &rarr;</button>
+      <button class="btn-secondary" data-back>Back</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STEP 4 — TURNOVER + TONNAGE
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="4" hidden>
+
+    <h2 class="step-title">Turnover &amp; packaging tonnage</h2>
+
+    <div class="two-col-row">
+      <div class="q-block">
+        <span class="q-label">Annual UK turnover</span>
+        <div class="q-what">Your annual turnover based on most recent annual accounts up to 7 April. This is UK turnover, not global revenue.</div>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="turnoverBand" value="lt1m" /><span class="choice-text"><span class="choice-main">Less than £1 million</span></span></label>
+          <label class="choice"><input type="radio" name="turnoverBand" value="1to2m" /><span class="choice-text"><span class="choice-main">£1 million to £2 million</span></span></label>
+          <label class="choice"><input type="radio" name="turnoverBand" value="gte2m" /><span class="choice-text"><span class="choice-main">£2 million or more</span></span></label>
+          <label class="choice"><input type="radio" name="turnoverBand" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+        </div>
+      </div>
+
+      <div class="q-block">
+        <span class="q-label">Packaging tonnage (tonnes)</span>
+        <div class="q-what">How many tonnes of packaging you supplied or imported onto the UK market in the previous calendar year. Many organisations undercount by forgetting shipment/tertiary packaging.</div>
+        <div class="choice-grid">
+          <label class="choice"><input type="radio" name="tonnageBand" value="le25" /><span class="choice-text"><span class="choice-main">25 tonnes or less</span><span class="choice-hint">If exactly 25 tonnes, choose this option.</span></span></label>
+          <label class="choice"><input type="radio" name="tonnageBand" value="25to50" /><span class="choice-text"><span class="choice-main">More than 25 and up to 50 tonnes</span></span></label>
+          <label class="choice"><input type="radio" name="tonnageBand" value="gt50" /><span class="choice-text"><span class="choice-main">More than 50 tonnes</span></span></label>
+          <label class="choice"><input type="radio" name="tonnageBand" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Does your tonnage estimate include shipping and transit packaging?</span>
+      <div class="q-what">Outer cartons, mailers, pallets, stretch wrap, void fill, protective packaging, and packaging used to deliver goods.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="includesTransit" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+        <label class="choice"><input type="radio" name="includesTransit" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+        <label class="choice"><input type="radio" name="includesTransit" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-primary" data-next>See result &rarr;</button>
+      <button class="btn-secondary" data-back>Back</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STEP 5 — RESULT
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="5" hidden>
+
+    <h2 class="step-title">Your eligibility result</h2>
+
+    <div id="resultBox"></div>
+    <div class="nav-row" id="resultActions"></div>
+
+    <div class="tiny" style="margin-top:1.5rem;">
+      Notes:
+      <ul>
+        <li>We only provide automated classification for clean single-entity cases with clear answers.</li>
+        <li>Complex cases (groups, marketplaces, unclear importer responsibility) are routed to an assessment for defensibility.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STEP 6 — TIMING + REGISTRATION
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="6" hidden>
+
+    <h2 class="step-title">Timing &amp; registration readiness</h2>
+
+    <div class="q-block">
+      <span class="q-label">Which deadline are you working toward?</span>
+      <div class="q-what">Large organisations report twice yearly (1 October and 1 April). Small producers report annually (typically by 1 April).</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="deadlineWindow" value="before_april" /><span class="choice-text"><span class="choice-main">Before 1 April</span></span></label>
+        <label class="choice"><input type="radio" name="deadlineWindow" value="before_october" /><span class="choice-text"><span class="choice-main">Before 1 October</span></span></label>
+        <label class="choice"><input type="radio" name="deadlineWindow" value="asap" /><span class="choice-text"><span class="choice-main">As soon as possible</span></span></label>
+        <label class="choice"><input type="radio" name="deadlineWindow" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Do you already have an approved "Report Packaging Data" account?</span>
+      <div class="q-what">Account approval can take up to 28 days after an approved person is requested. Not having an approved account can block submission even if the file is ready.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="rpdStatus" value="approved" /><span class="choice-text"><span class="choice-main">Yes — approved</span></span></label>
+        <label class="choice"><input type="radio" name="rpdStatus" value="submitted" /><span class="choice-text"><span class="choice-main">Application submitted</span></span></label>
+        <label class="choice"><input type="radio" name="rpdStatus" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+        <label class="choice"><input type="radio" name="rpdStatus" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Do you have access to an authorised person who can create/approve the account if needed?</span>
+      <div class="q-what">Typically a director/company secretary (limited company), partner (partnership), member (LLP), or the sole trader.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="authorisedPerson" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+        <label class="choice"><input type="radio" name="authorisedPerson" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+        <label class="choice"><input type="radio" name="authorisedPerson" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">How do you plan to register?</span>
+      <div class="q-what">Registering directly vs using a compliance scheme affects who handles admin and the regulator fee. We'll confirm current GOV.UK fee amounts in your quote.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="registrationRoute" value="direct" /><span class="choice-text"><span class="choice-main">Self-register directly</span></span></label>
+        <label class="choice"><input type="radio" name="registrationRoute" value="scheme" /><span class="choice-text"><span class="choice-main">Use a compliance scheme</span></span></label>
+        <label class="choice"><input type="radio" name="registrationRoute" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-primary" data-next>Continue &rarr;</button>
+      <button class="btn-secondary" data-back>Back</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STEP 7 — DATA COMPLEXITY
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="7" hidden>
+
+    <h2 class="step-title">Data complexity inputs</h2>
+
+    <div class="q-block">
+      <span class="q-label">Approximate number of SKUs</span>
+      <div class="q-what">Distinct products/variants that may have different packaging (size, flavour, bundle, etc).</div>
+      <div class="choice-grid two-col">
+        <label class="choice"><input type="radio" name="skuBand" value="1-10" /><span class="choice-text"><span class="choice-main">1–10</span></span></label>
+        <label class="choice"><input type="radio" name="skuBand" value="11-50" /><span class="choice-text"><span class="choice-main">11–50</span></span></label>
+        <label class="choice"><input type="radio" name="skuBand" value="51-200" /><span class="choice-text"><span class="choice-main">51–200</span></span></label>
+        <label class="choice"><input type="radio" name="skuBand" value="200plus" /><span class="choice-text"><span class="choice-main">200+</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Which packaging classes do you use? Select all that apply.</span>
+      <div class="q-what">Primary (around the sales unit), Secondary (multipacks/shelf-ready), Shipment (e-commerce parcels), Tertiary (transport packaging like pallet wrap/outer cartons).</div>
+      <div class="choice-grid two-col">
+        <label class="choice"><input type="checkbox" name="packClasses" value="primary" /><span class="choice-text"><span class="choice-main">Primary</span></span></label>
+        <label class="choice"><input type="checkbox" name="packClasses" value="secondary" /><span class="choice-text"><span class="choice-main">Secondary</span></span></label>
+        <label class="choice"><input type="checkbox" name="packClasses" value="shipment" /><span class="choice-text"><span class="choice-main">Shipment</span></span></label>
+        <label class="choice"><input type="checkbox" name="packClasses" value="tertiary" /><span class="choice-text"><span class="choice-main">Tertiary</span></span></label>
+        <label class="choice"><input type="checkbox" name="packClasses" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Do you supply packaged goods to customers in Scotland, Wales, or Northern Ireland?</span>
+      <div class="q-what">Supplying across multiple UK nations can increase reporting complexity where nation data is required.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="devolved" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+        <label class="choice"><input type="radio" name="devolved" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+        <label class="choice"><input type="radio" name="devolved" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Do you supply drinks in containers to UK households?</span>
+      <div class="q-what">Drinks containers can trigger household drinks container (HDC) reporting. For small producers, GOV.UK guidance requires reporting drinks containers under HDC.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="hdc" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+        <label class="choice"><input type="radio" name="hdc" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+        <label class="choice"><input type="radio" name="hdc" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Nation data / extra reporting checks — select all that apply.</span>
+      <div class="q-what">GOV.UK lists cases where you may need to collect nation data (this often increases checking and admin work).</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="checkbox" name="nationTriggers" value="end_users" /><span class="choice-text"><span class="choice-main">We supply packaged goods to end users (direct to consumers)</span></span></label>
+        <label class="choice"><input type="checkbox" name="nationTriggers" value="empty_to_small" /><span class="choice-text"><span class="choice-main">We supply empty packaging to small/non-obligated producers</span></span></label>
+        <label class="choice"><input type="checkbox" name="nationTriggers" value="hire_loan" /><span class="choice-text"><span class="choice-main">We hire/loan reusable packaging</span></span></label>
+        <label class="choice"><input type="checkbox" name="nationTriggers" value="marketplace_nonuk" /><span class="choice-text"><span class="choice-main">We own a marketplace used by non-UK sellers to sell to UK consumers</span></span></label>
+        <label class="choice"><input type="checkbox" name="nationTriggers" value="import_discard" /><span class="choice-text"><span class="choice-main">We import packaged goods for our own use and discard the packaging</span></span></label>
+        <label class="choice"><input type="checkbox" name="nationTriggers" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-primary" data-next>Continue &rarr;</button>
+      <button class="btn-secondary" data-back>Back</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STEP 8 — DATA READINESS
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="8" hidden>
+
+    <h2 class="step-title">Data readiness &amp; evidence</h2>
+
+    <div class="q-block">
+      <span class="q-label">Do you already have packaging totals prepared for submission?</span>
+      <div class="q-what">Totals by packaging material and packaging class/activity are already compiled — not just "we have invoices somewhere".</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="totalsReady" value="yes" /><span class="choice-text"><span class="choice-main">Yes</span></span></label>
+        <label class="choice"><input type="radio" name="totalsReady" value="no" /><span class="choice-text"><span class="choice-main">No</span></span></label>
+        <label class="choice"><input type="radio" name="totalsReady" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Packaging specification quality</span>
+      <div class="q-what">
+        <strong>High:</strong> supplier specs/weights for most components.<br/>
+        <strong>Medium:</strong> some gaps; some supplier chasing/estimation needed.<br/>
+        <strong>Low:</strong> major gaps; measurement/estimation required.
+      </div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="specQuality" value="high" /><span class="choice-text"><span class="choice-main">High</span></span></label>
+        <label class="choice"><input type="radio" name="specQuality" value="medium" /><span class="choice-text"><span class="choice-main">Medium</span></span></label>
+        <label class="choice"><input type="radio" name="specQuality" value="low" /><span class="choice-text"><span class="choice-main">Low</span></span></label>
+        <label class="choice"><input type="radio" name="specQuality" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="q-block">
+      <span class="q-label">Evidence quality for weights</span>
+      <div class="q-what">Evidence includes supplier specs, technical sheets, invoices, or recorded measurements. Weak evidence increases work needed to keep the submission defensible.</div>
+      <div class="choice-grid">
+        <label class="choice"><input type="radio" name="evidenceQuality" value="yes" /><span class="choice-text"><span class="choice-main">Yes — strong evidence</span></span></label>
+        <label class="choice"><input type="radio" name="evidenceQuality" value="some" /><span class="choice-text"><span class="choice-main">Some evidence</span></span></label>
+        <label class="choice"><input type="radio" name="evidenceQuality" value="no" /><span class="choice-text"><span class="choice-main">No — we would need to build evidence</span></span></label>
+        <label class="choice"><input type="radio" name="evidenceQuality" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-primary" data-next>See recommendation &rarr;</button>
+      <button class="btn-secondary" data-back>Back</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STEP 9 — RECOMMENDATION
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="9" hidden>
+
+    <h2 class="step-title">Your service recommendation</h2>
+    <div id="recBox"></div>
+
+    <div class="nav-row">
+      <button class="btn-primary" id="toContactBtn">Get a quote &rarr;</button>
+      <button class="btn-secondary" data-back>Back</button>
+      <a class="btn-ghost" href="/explainer">Read the explainer</a>
+      <button class="btn-ghost" id="startAgainBtn9">Start again</button>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       STEP 10 — CONTACT DETAILS
+  ══════════════════════════════════════════ -->
+  <section class="card" data-step="10" hidden>
+
+    <h2 class="step-title">Contact details</h2>
+    <p style="font-size:0.9rem;color:var(--ink-muted);margin-bottom:1.5rem;">We use this to send your quote and next steps, and to contact you if one clarification is needed to confirm scope or pricing.</p>
+
+    <label class="field">
+      <span class="q-label">Company</span>
+      <input id="contactCompany" type="text" autocomplete="organization" />
+    </label>
+
+    <label class="field">
+      <span class="q-label">Name</span>
+      <input id="contactName" type="text" autocomplete="name" />
+    </label>
+
+    <label class="field">
+      <span class="q-label">Email</span>
+      <input id="contactEmail" type="email" autocomplete="email" />
+    </label>
+
+    <label class="field">
+      <span class="q-label">Phone (optional)</span>
+      <input id="contactPhone" type="tel" autocomplete="tel" />
+    </label>
+
+    <label class="field">
+      <span class="q-label">Optional notes</span>
+      <textarea id="contactNotes" placeholder="Any extra context (deadline, number of SKUs, how you currently store packaging info, etc)."></textarea>
+    </label>
+
+    <div class="hr"></div>
+
+    <span class="q-label">Bot protection</span>
+    <p class="tiny" style="margin-bottom:0.75rem;">Please complete the check below before submitting.</p>
+    <div class="cf-turnstile" data-sitekey="0x4AAAAAACZ1bjNrsUKimhQV"></div>
+
+    <div id="submitMsg" class="msg info" hidden></div>
+
+    <div class="nav-row">
+      <button class="btn-primary" id="submitBtn">Submit</button>
+      <button class="btn-secondary" data-back>Back</button>
+      <button class="btn-ghost" id="startAgainBtn10">Start again</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    &copy; 2026 Relicare &mdash; UK Packaging EPR Submission Specialists<br/>
+    <a href="/">Home</a> &middot;
+    <a href="/explainer">What is EPR?</a> &middot;
+    <a href="/#packages">Pricing</a>
+  </p>
+  <p style="margin-top:0.75rem;font-size:0.75rem;color:#2a3a30;">
+    We are an independent specialist service provider. We are not a registered compliance scheme. We do not provide legal advice.
+  </p>
+</footer>
+
+<script is:inline>
+  // ── CONFIG ──
+  const API_ENDPOINT = "https://api.relicareuk.com/";
+
+  const PRICES = {
+    assessment: "£450 + VAT",
+    formatOnly: "From £250 + VAT",
+    fullLow: "From £595 + VAT",
+    fullMedium: "From £895 + VAT",
+    fullHigh: "Custom Quote",
+  };
+
+  // ── PROGRESS ──
+
+  function updateProgress(step) {
+    document.getElementById("progressFill").style.width = (step / 10 * 100) + "%";
+  }
+
+  // ── MESSAGING ──
+  const globalMsg = document.getElementById("globalMsg");
+  function setGlobalMsg(kind, text) {
+    globalMsg.className = "msg " + kind;
+    globalMsg.textContent = text;
+    globalMsg.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function clearGlobalMsg() { globalMsg.hidden = true; globalMsg.textContent = ""; }
+
+  // ── NAVIGATION ──
+  const sections = Array.from(document.querySelectorAll("[data-step]"));
+  const navHistory = [];
+
+  function currentStep() {
+    const v = sections.find(s => !s.hidden);
+    return v ? Number(v.dataset.step) : 1;
+  }
+
+  function showStep(step, pushHistory = true) {
+    clearGlobalMsg();
+    const cur = currentStep();
+    if (pushHistory && cur !== step) navHistory.push(cur);
+    sections.forEach(el => (el.hidden = Number(el.dataset.step) !== step));
+    updateProgress(step);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function goBack() {
+    clearGlobalMsg();
+    const prev = navHistory.pop();
+    if (prev) showStep(prev, false);
+    else showStep(1, false);
+  }
+
+  function resetAll() { window.location.href = "/eligibility-check"; }
+
+  document.getElementById("startAgainTop").addEventListener("click", resetAll);
+  document.getElementById("startAgainBtn9").addEventListener("click", resetAll);
+  document.getElementById("startAgainBtn10").addEventListener("click", resetAll);
+
+  // ── HELPERS ──
+  function getRadio(name) {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : "";
+  }
+  function getChecks(name) {
+    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(x => x.value);
+  }
+  function turnstileToken() {
+    const el = document.querySelector('[name="cf-turnstile-response"]');
+    return el?.value?.trim() ?? "";
+  }
+
+  // ── EXCLUSIVE NOT SURE ──
+  function wireExclusiveNotSure(name) {
+    const boxes = Array.from(document.querySelectorAll(`input[name="${name}"]`));
+    const ns = boxes.find(b => b.value === "not_sure");
+    if (!ns) return;
+    boxes.forEach(b => b.addEventListener("change", () => {
+      if (ns.checked) boxes.forEach(b2 => { if (b2 !== ns) b2.checked = false; });
+    }));
+  }
+  wireExclusiveNotSure("activities");
+  wireExclusiveNotSure("packClasses");
+  wireExclusiveNotSure("nationTriggers");
+
+  // ── STEP 3 BLOCKS ──
+  const importBlock      = document.getElementById("importBlock");
+  const packFillBlock    = document.getElementById("packFillBlock");
+  const emptyPackBlock   = document.getElementById("emptyPackagingBlock");
+  const reusableNote     = document.getElementById("reusableNote");
+
+  function shouldShowStep3(acts) {
+    return acts.includes("import") || acts.includes("pack_fill") || acts.includes("empty_packaging") || acts.includes("hire_loan");
+  }
+  function configureStep3(acts) {
+    importBlock.hidden    = !acts.includes("import");
+    packFillBlock.hidden  = !acts.includes("pack_fill");
+    emptyPackBlock.hidden = !acts.includes("empty_packaging");
+    reusableNote.hidden   = !acts.includes("hire_loan");
+  }
+
+  // ── CORE LOGIC (unchanged from original) ──
+  function computeResult() {
+    const ukEstablished = getRadio("ukEstablished");
+    const isCharity     = getRadio("isCharity");
+    const reproc        = getRadio("reprocessorExporter");
+    const group         = getRadio("groupStructure");
+    const activities    = getChecks("activities");
+    const activitySummary = activities.join(", ");
+    const reasons = [];
+    let assessmentRequired = false;
+    const groupFlag = group !== "" && group !== "one_company";
+
+    if (ukEstablished !== "yes") { assessmentRequired = true; reasons.push("UK establishment is not confirmed."); }
+
+    const charityExemptLikely = isCharity === "yes" && reproc === "no";
+    if (isCharity === "yes" && reproc !== "no") { assessmentRequired = true; reasons.push("Charity with possible reprocessor/exporter activity requires assessment."); }
+    if (reproc === "yes" || reproc === "not_sure") { assessmentRequired = true; reasons.push("Reprocessor/exporter cases require assessment."); }
+    if (groupFlag) { assessmentRequired = true; reasons.push("Group rules can change responsibility and thresholds."); }
+
+    if (activities.length === 0) {
+      if (charityExemptLikely) return { result: "CHARITY_EXEMPT_LIKELY", assessmentRequired: false, reasons: [], groupFlag, activitySummary };
+      return { result: "OUT_OF_SCOPE", assessmentRequired: false, reasons: [], groupFlag, activitySummary };
+    }
+
+    const anyNonNotSure = activities.some(a => a !== "not_sure");
+    if (!anyNonNotSure) { assessmentRequired = true; reasons.push("No specific packaging activity is confirmed (only 'Not sure' selected)."); }
+    if (activities.includes("marketplace")) { assessmentRequired = true; reasons.push("Online marketplace cases require assessment."); }
+    if (activities.includes("not_sure")) { assessmentRequired = true; reasons.push("Uncertainty on packaging activities."); }
+
+    if (charityExemptLikely) return { result: "CHARITY_EXEMPT_LIKELY", assessmentRequired: false, reasons: [], groupFlag, activitySummary };
+
+    if (activities.includes("import")) {
+      const brand = getRadio("importBrand"), onBehalf = getRadio("importOnBehalf"),
+            ukThird = getRadio("importUKThirdPartyOverseas"), discard = getRadio("discardBeforeSell");
+      const anyMissing = importBlock.hidden ? false : (!brand || !onBehalf || !ukThird || !discard);
+      if (anyMissing) { assessmentRequired = true; reasons.push("Importer details incomplete."); }
+      else {
+        if ([brand, onBehalf, ukThird, discard].includes("not_sure")) { assessmentRequired = true; reasons.push("Importer responsibility is uncertain."); }
+        else if (!(brand === "our_brand" && onBehalf === "no" && ukThird === "no")) { assessmentRequired = true; reasons.push("Importer responsibility may sit with another party (assessment recommended)."); }
+      }
+    }
+
+    if (activities.includes("pack_fill")) {
+      const forUK = getRadio("packForUKBrandOwner"), large = getRadio("brandOwnerLarge");
+      const anyMissing = packFillBlock.hidden ? false : (!forUK || !large);
+      if (anyMissing) { assessmentRequired = true; reasons.push("Pack/fill details incomplete."); }
+      else if ([forUK, large].includes("not_sure")) { assessmentRequired = true; reasons.push("Pack/fill responsibility is uncertain."); }
+      else if (forUK === "yes_mostly") { assessmentRequired = true; reasons.push("Contract packing/filling for another brand owner requires assessment."); }
+    }
+
+    if (activities.includes("empty_packaging")) {
+      const cust = getRadio("emptyPackagingCustomer");
+      if (!cust) { assessmentRequired = true; reasons.push("Empty packaging customer type not provided."); }
+      else if (cust === "not_sure") { assessmentRequired = true; reasons.push("Empty packaging responsibility unclear."); }
+      else if (cust === "mainly_large_they_fill") { assessmentRequired = true; reasons.push("Empty packaging supplied mainly to large organisations that fill it (assessment recommended)."); }
+    }
+
+    const turnover = getRadio("turnoverBand"), tonnage = getRadio("tonnageBand");
+    if (!turnover || turnover === "not_sure") { assessmentRequired = true; reasons.push("Turnover is not confirmed."); }
+    if (!tonnage || tonnage === "not_sure") { assessmentRequired = true; reasons.push("Tonnage is not confirmed."); }
+
+    if (assessmentRequired) return { result: "ASSESSMENT_REQUIRED", assessmentRequired: true, reasons, groupFlag, activitySummary };
+
+    if (turnover === "lt1m" || tonnage === "le25") return { result: "NOT_OBLIGATED", assessmentRequired: false, reasons: [], groupFlag, activitySummary };
+    if (turnover === "gte2m" && tonnage === "gt50") return { result: "LIKELY_LARGE", assessmentRequired: false, reasons: [], groupFlag, activitySummary };
+
+    const small = (turnover === "1to2m" && (tonnage === "25to50" || tonnage === "gt50")) ||
+                  (turnover === "gte2m" && tonnage === "25to50");
+    if (small) return { result: "LIKELY_SMALL", assessmentRequired: false, reasons: [], groupFlag, activitySummary };
+
+    return { result: "ASSESSMENT_REQUIRED", assessmentRequired: true, reasons: ["Edge case not safely classifiable."], groupFlag, activitySummary };
+  }
+
+  function computeRecommendation(result, assessmentRequired) {
+    const notes = [], addOns = [];
+    let score = 0;
+    const deadlineWindow = getRadio("deadlineWindow"), rpdStatus = getRadio("rpdStatus"), authorisedPerson = getRadio("authorisedPerson");
+    let timingRisk = null;
+
+    if (["before_april","before_october","asap","not_sure"].includes(deadlineWindow) && ["no","not_sure"].includes(rpdStatus)) {
+      timingRisk = "You may be time-blocked: RPD account approval can take up to 28 days. Start that process immediately.";
+      score += 2;
+    }
+    if (authorisedPerson === "no" || authorisedPerson === "not_sure") { addOns.push("Account setup may need an authorised person (director/company secretary/partner/LLP member/sole trader)."); score += 2; }
+
+    const sku = getRadio("skuBand");
+    if (sku === "1-10") score += 1; else if (sku === "11-50") score += 2; else if (sku === "51-200") score += 3; else if (sku === "200plus") score += 4;
+
+    const packClasses = getChecks("packClasses");
+    if (packClasses.includes("not_sure")) score += 2; else score += Math.max(0, packClasses.length - 1);
+
+    const devolved = getRadio("devolved");
+    if (devolved === "yes" || devolved === "not_sure") score += 1;
+
+    const hdc = getRadio("hdc");
+    if (hdc === "yes") { score += 1; addOns.push("Household drinks containers reporting likely applies."); }
+    if (hdc === "not_sure") { score += 1; addOns.push("Drinks containers status unclear (may affect reporting)."); }
+
+    const nationTriggers = getChecks("nationTriggers");
+    if (nationTriggers.length) { score += 1; addOns.push("Nation data / extra reporting checks may apply."); }
+
+    const totalsReady = getRadio("totalsReady");
+    if (totalsReady === "no" || totalsReady === "not_sure") score += 2;
+
+    const spec = getRadio("specQuality");
+    if (spec === "medium") score += 1; else if (spec === "low" || spec === "not_sure") score += 2;
+
+    const evidence = getRadio("evidenceQuality");
+    if (evidence === "some") score += 1; else if (evidence === "no" || evidence === "not_sure") score += 2;
+
+    const includesTransit = getRadio("includesTransit");
+    if (includesTransit === "no" || includesTransit === "not_sure") { addOns.push("Your tonnage may be understated if shipping/transit packaging is missing."); score += 1; }
+
+    const acts = getChecks("activities");
+    if (acts.includes("hire_loan")) score += 2;
+    if (acts.includes("import")) score += 1;
+    if (acts.includes("empty_packaging")) score += 1;
+    if (acts.includes("third_party_under_brand")) { score += 1; addOns.push("Third-party manufacture/packing/import under your brand may require supplier chasing and stronger evidence."); }
+
+    let tier = "Low";
+    if (score >= 6 && score <= 9) tier = "Medium";
+    if (score >= 10) tier = "High";
+
+    if (assessmentRequired || result === "ASSESSMENT_REQUIRED") {
+      return { package: "ELIGIBILITY_ASSESSMENT", tier, score, addOns, timingRisk, notes: ["Based on your answers, we cannot safely confirm eligibility via automation.", "We recommend an eligibility assessment so your position is defensible."], priceText: PRICES.assessment };
+    }
+    if (result === "LIKELY_LARGE") {
+      return { package: "NOT_SUPPORTED", tier, score, addOns, timingRisk, notes: ["Based on your answers, you're likely a Large Producer.", "We currently focus on Small Producers. We can refer you or provide next steps."], priceText: "Not currently supported (we can still respond with next steps)" };
+    }
+    if (result === "NOT_OBLIGATED" || result === "OUT_OF_SCOPE" || result === "CHARITY_EXEMPT_LIKELY") {
+      return { package: "ELIGIBILITY_ASSESSMENT", tier, score, addOns, timingRisk, notes: ["You're likely not required to take action based on the thresholds you selected.", "If you want reassurance, an eligibility assessment is the safest option."], priceText: PRICES.assessment };
+    }
+
+    const formatOnlyEligible = totalsReady === "yes" && (spec === "high" || spec === "medium") && (evidence === "yes" || evidence === "some") && tier === "Low" && !acts.includes("hire_loan") && !nationTriggers.includes("not_sure");
+
+    if (formatOnlyEligible) {
+      notes.push("You indicated totals and reasonable specs/evidence — format-only may be suitable.");
+      return { package: "FORMAT_ONLY", tier, score, notes, addOns, timingRisk, priceText: PRICES.formatOnly };
+    }
+
+    notes.push("A full preparation pack is recommended based on complexity/risk factors.");
+    let priceText = PRICES.fullLow;
+    if (tier === "Medium") priceText = PRICES.fullMedium;
+    if (tier === "High") priceText = PRICES.fullHigh;
+
+    return { package: "FULL_PACK_" + tier.toUpperCase(), tier, score, notes, addOns, timingRisk, priceText };
+  }
+
+  // ── RENDER RESULT ──
+  function renderResult() {
+    const box = document.getElementById("resultBox");
+    const actions = document.getElementById("resultActions");
+    document.getElementById("activityNoneMsg").hidden = true;
+    const res = computeResult();
+    box.innerHTML = "";
+    actions.innerHTML = "";
+
+    const configs = {
+      OUT_OF_SCOPE:         { pill: "plain",  pillText: "Likely out of scope",      heading: "You're likely outside Packaging EPR scope.",         sub: "Based on your selected activities, you do not appear to be obligated." },
+      CHARITY_EXEMPT_LIKELY:{ pill: "green",  pillText: "Charity — likely exempt",  heading: "You are likely exempt as a producer (charity).",     sub: "Charities are generally exempt unless they are reprocessors/exporters." },
+      ASSESSMENT_REQUIRED:  { pill: "amber",  pillText: "Assessment required",       heading: "We can't safely confirm eligibility from your answers.", sub: "" },
+      NOT_OBLIGATED:        { pill: "green",  pillText: "Likely not obligated",      heading: "You are likely not required to take action.",        sub: "Your turnover or tonnage is below the obligation thresholds." },
+      LIKELY_SMALL:         { pill: "green",  pillText: "Likely Small Producer",     heading: "You are likely a Small Producer.",                   sub: "Continue for a service recommendation and indicative price." },
+      LIKELY_LARGE:         { pill: "blue",   pillText: "Likely Large Producer",     heading: "You are likely a Large Producer.",                   sub: "We currently focus on Small Producers." },
+    };
+
+    const cfg = configs[res.result] || configs["ASSESSMENT_REQUIRED"];
+
+    let reasonsHtml = "";
+    if (res.result === "ASSESSMENT_REQUIRED" && res.reasons.length) {
+      reasonsHtml = `<div class="msg warn" style="margin-top:1rem;"><strong>Why assessment is needed</strong><ul>${res.reasons.map(r => `<li>${r}</li>`).join("")}</ul></div>`;
+    }
+
+    box.innerHTML = `
+      <span class="result-pill ${cfg.pill}">${cfg.pillText}</span>
+      <h3 class="result-heading">${cfg.heading}</h3>
+      ${cfg.sub ? `<p class="result-sub">${cfg.sub}</p>` : ""}
+      ${reasonsHtml}
+    `;
+
+    const primaryLabel = res.result === "CHARITY_EXEMPT_LIKELY" ? "Optional: paid confirmation" :
+                         res.result === "LIKELY_LARGE" ? "Submit details" : "Get a quote &rarr;";
+
+    actions.innerHTML = `
+      <button class="btn-primary" id="quoteFromResult">${primaryLabel}</button>
+      <button class="btn-secondary" id="resetFromResult">Start again</button>
+    `;
+
+    document.getElementById("resetFromResult").addEventListener("click", resetAll);
+    document.getElementById("quoteFromResult").addEventListener("click", () => showStep(6));
+  }
+
+  // ── RENDER RECOMMENDATION ──
+  function renderRecommendation() {
+    const recBox = document.getElementById("recBox");
+    const res = computeResult();
+    const rec = computeRecommendation(res.result, res.assessmentRequired);
+
+    const addOnsHtml = rec.addOns.length
+      ? `<ul class="rec-list">${rec.addOns.map(x => `<li>${x}</li>`).join("")}</ul>`
+      : `<p style="font-size:0.85rem;color:var(--ink-faint);">None flagged.</p>`;
+
+    const notesHtml = `<ul class="rec-list">${rec.notes.map(x => `<li>${x}</li>`).join("")}</ul>`;
+    const timingHtml = rec.timingRisk ? `<div class="msg warn" style="margin-top:1rem;"><strong>Timing risk</strong>${rec.timingRisk}</div>` : "";
+
+    recBox.innerHTML = `
+      <div style="margin-bottom:0.75rem;">
+        <span class="result-pill plain">${rec.package.replace(/_/g, " ")}</span>
+        <span class="result-pill plain">Tier: ${rec.tier}</span>
+        <span class="result-pill plain">Complexity score: ${rec.score}</span>
+      </div>
+      <div class="rec-section">
+        <div class="rec-section-label">What this means</div>
+        ${notesHtml}
+        ${timingHtml}
+      </div>
+      <div class="rec-section">
+        <div class="rec-section-label">Add-ons / flags</div>
+        ${addOnsHtml}
+      </div>
+      <div class="price-box">
+        <span class="price-box-label">Indicative price</span>
+        <span class="price-box-value">${rec.priceText}</span>
+        <span class="price-box-note">+ VAT where not stated</span>
+      </div>
+    `;
+  }
+
+  // ── CLICK HANDLER ──
+  document.addEventListener("click", e => {
+    const back = e.target.closest("[data-back]");
+    const next = e.target.closest("[data-next]");
+    if (back) { e.preventDefault(); goBack(); }
+    if (next) { e.preventDefault(); handleNext(); }
+  });
+
+  function handleNext() {
+    clearGlobalMsg();
+    const step = currentStep();
+
+    if (step === 1) {
+      if (!getRadio("ukEstablished") || !getRadio("isCharity") || !getRadio("reprocessorExporter") || !getRadio("groupStructure"))
+        return setGlobalMsg("warn", "Please answer all questions on this screen to continue.");
+      showStep(2); return;
+    }
+
+    if (step === 2) {
+      const acts = getChecks("activities");
+      if (acts.length === 0) { document.getElementById("activityNoneMsg").hidden = false; showStep(5); renderResult(); return; }
+      if (acts.includes("marketplace") || acts.includes("not_sure")) { showStep(5); renderResult(); return; }
+      configureStep3(acts);
+      if (shouldShowStep3(acts)) showStep(3); else showStep(4);
+      return;
+    }
+
+    if (step === 3) {
+      const acts = getChecks("activities");
+      if (acts.includes("import")) {
+        for (const n of ["importBrand","importOnBehalf","importUKThirdPartyOverseas","discardBeforeSell"])
+          if (!getRadio(n)) return setGlobalMsg("warn", "Please complete all importer questions to continue.");
+      }
+      if (acts.includes("pack_fill")) {
+        for (const n of ["packForUKBrandOwner","brandOwnerLarge"])
+          if (!getRadio(n)) return setGlobalMsg("warn", "Please complete all pack/fill questions to continue.");
+      }
+      if (acts.includes("empty_packaging") && !getRadio("emptyPackagingCustomer"))
+        return setGlobalMsg("warn", "Please answer the empty packaging question to continue.");
+      showStep(4); return;
+    }
+
+    if (step === 4) {
+      if (!getRadio("turnoverBand") || !getRadio("tonnageBand") || !getRadio("includesTransit"))
+        return setGlobalMsg("warn", "Please complete turnover, tonnage, and shipping/transit coverage.");
+      showStep(5); renderResult(); return;
+    }
+
+    if (step === 6) {
+      if (!getRadio("deadlineWindow") || !getRadio("rpdStatus") || !getRadio("authorisedPerson") || !getRadio("registrationRoute"))
+        return setGlobalMsg("warn", "Please answer all questions.");
+      showStep(7); return;
+    }
+
+    if (step === 7) {
+      if (!getRadio("skuBand") || getChecks("packClasses").length === 0 || !getRadio("devolved") || !getRadio("hdc"))
+        return setGlobalMsg("warn", "Please complete all required fields.");
+      showStep(8); return;
+    }
+
+    if (step === 8) {
+      if (!getRadio("totalsReady") || !getRadio("specQuality") || !getRadio("evidenceQuality"))
+        return setGlobalMsg("warn", "Please answer all questions.");
+      showStep(9); renderRecommendation(); return;
+    }
+  }
+
+  document.getElementById("toContactBtn").addEventListener("click", () => showStep(10));
+
+  // ── SUBMIT ──
+  document.getElementById("submitBtn").addEventListener("click", async () => {
+    clearGlobalMsg();
+    const company = document.getElementById("contactCompany").value.trim();
+    const name    = document.getElementById("contactName").value.trim();
+    const email   = document.getElementById("contactEmail").value.trim();
+    const phone   = document.getElementById("contactPhone").value.trim();
+    const notes   = document.getElementById("contactNotes").value.trim();
+
+    if (!company || !name || !email) return setGlobalMsg("warn", "Please fill in Company, Name, and Email.");
+    const token = turnstileToken();
+    if (!token) return setGlobalMsg("warn", "Please complete the bot protection check (Turnstile).");
+
+    const submitMsg = document.getElementById("submitMsg");
+    submitMsg.hidden = false;
+    submitMsg.className = "msg info";
+    submitMsg.textContent = "Submitting…";
+
+    const res = computeResult();
+    const rec = computeRecommendation(res.result, res.assessmentRequired);
+
+    const payload = {
+      company, name, email, phone, message: notes,
+      turnstileToken: token,
+      eligibilityStatus: res.result,
+      assessmentRequired: res.assessmentRequired,
+      recommendedPackage: rec.package,
+      complexityTier: rec.tier,
+      complexityScore: rec.score,
+      answers: {
+        ukEstablished: getRadio("ukEstablished"), isCharity: getRadio("isCharity"),
+        reprocessorExporter: getRadio("reprocessorExporter"), groupStructure: getRadio("groupStructure"),
+        activities: getChecks("activities"), importBrand: getRadio("importBrand"),
+        importOnBehalf: getRadio("importOnBehalf"), importUKThirdPartyOverseas: getRadio("importUKThirdPartyOverseas"),
+        discardBeforeSell: getRadio("discardBeforeSell"), packForUKBrandOwner: getRadio("packForUKBrandOwner"),
+        brandOwnerLarge: getRadio("brandOwnerLarge"), emptyPackagingCustomer: getRadio("emptyPackagingCustomer"),
+        turnoverBand: getRadio("turnoverBand"), tonnageBand: getRadio("tonnageBand"),
+        includesTransit: getRadio("includesTransit"), deadlineWindow: getRadio("deadlineWindow"),
+        rpdStatus: getRadio("rpdStatus"), authorisedPerson: getRadio("authorisedPerson"),
+        registrationRoute: getRadio("registrationRoute"), skuBand: getRadio("skuBand"),
+        packClasses: getChecks("packClasses"), devolved: getRadio("devolved"),
+        hdc: getRadio("hdc"), nationTriggers: getChecks("nationTriggers"),
+        totalsReady: getRadio("totalsReady"), specQuality: getRadio("specQuality"),
+        evidenceQuality: getRadio("evidenceQuality"),
+      },
+      receivedAt: new Date().toISOString(),
+      source: "Website Quiz v1",
+    };
+
+    try {
+      const resp = await fetch(API_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || data?.ok !== true) { submitMsg.className = "msg danger"; submitMsg.textContent = "Submission failed. Please try again or book a call."; return; }
+      submitMsg.className = "msg info";
+      submitMsg.textContent = "Success — submitted. We'll email you with next steps shortly.";
+    } catch (err) {
+      submitMsg.className = "msg danger";
+      submitMsg.textContent = "Network error. Please try again, or book a call.";
+    }
+  });
+
+  // ── INIT ──
+  showStep(1, false);
+</script>
+
+</body>
+</html>
