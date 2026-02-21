@@ -1495,65 +1495,124 @@
   document.getElementById("toContactBtn").addEventListener("click", () => showStep(10));
 
   // ── SUBMIT ──
-  document.getElementById("submitBtn").addEventListener("click", async () => {
-    clearGlobalMsg();
-    const company = document.getElementById("contactCompany").value.trim();
-    const name    = document.getElementById("contactName").value.trim();
-    const email   = document.getElementById("contactEmail").value.trim();
-    const phone   = document.getElementById("contactPhone").value.trim();
-    const notes   = document.getElementById("contactNotes").value.trim();
+document.getElementById("submitBtn").addEventListener("click", async () => {
+  clearGlobalMsg();
 
-    if (!company || !name || !email) return setGlobalMsg("warn", "Please fill in Company, Name, and Email.");
-    const token = turnstileToken();
-    if (!token) return setGlobalMsg("warn", "Please complete the bot protection check (Turnstile).");
+  const company = document.getElementById("contactCompany").value.trim();
+  const name    = document.getElementById("contactName").value.trim();
+  const email   = document.getElementById("contactEmail").value.trim();
+  const phone   = document.getElementById("contactPhone").value.trim();
+  const notes   = document.getElementById("contactNotes").value.trim();
 
-    const submitMsg = document.getElementById("submitMsg");
-    submitMsg.hidden = false;
-    submitMsg.className = "msg info";
-    submitMsg.textContent = "Submitting…";
+  if (!company || !name || !email) {
+    return setGlobalMsg("warn", "Please fill in Company, Name, and Email.");
+  }
 
-    const res = computeResult();
-    const rec = computeRecommendation(res.result, res.assessmentRequired);
+  const token = turnstileToken();
+  if (!token) {
+    return setGlobalMsg("warn", "Please complete the bot protection check (Turnstile).");
+  }
 
-    const payload = {
-      company, name, email, phone, message: notes,
-      turnstileToken: token,
-      eligibilityStatus: res.result,
-      assessmentRequired: res.assessmentRequired,
-      recommendedPackage: rec.package,
-      complexityTier: rec.tier,
-      complexityScore: rec.score,
-      answers: {
-        ukEstablished: getRadio("ukEstablished"), isCharity: getRadio("isCharity"),
-        reprocessorExporter: getRadio("reprocessorExporter"), groupStructure: getRadio("groupStructure"),
-        activities: getChecks("activities"), importBrand: getRadio("importBrand"),
-        importOnBehalf: getRadio("importOnBehalf"), importUKThirdPartyOverseas: getRadio("importUKThirdPartyOverseas"),
-        discardBeforeSell: getRadio("discardBeforeSell"), packForUKBrandOwner: getRadio("packForUKBrandOwner"),
-        brandOwnerLarge: getRadio("brandOwnerLarge"), emptyPackagingCustomer: getRadio("emptyPackagingCustomer"),
-        turnoverBand: getRadio("turnoverBand"), tonnageBand: getRadio("tonnageBand"),
-        includesTransit: getRadio("includesTransit"), deadlineWindow: getRadio("deadlineWindow"),
-        rpdStatus: getRadio("rpdStatus"), authorisedPerson: getRadio("authorisedPerson"),
-        registrationRoute: getRadio("registrationRoute"), skuBand: getRadio("skuBand"),
-        packClasses: getChecks("packClasses"), devolved: getRadio("devolved"),
-        hdc: getRadio("hdc"), nationTriggers: getChecks("nationTriggers"),
-        totalsReady: getRadio("totalsReady"), specQuality: getRadio("specQuality"),
-        evidenceQuality: getRadio("evidenceQuality"),
-      },
-      receivedAt: new Date().toISOString(),
-      source: "Website Quiz v1",
-    };
+  const submitMsg = document.getElementById("submitMsg");
+  submitMsg.hidden = false;
+  submitMsg.className = "msg info";
+  submitMsg.textContent = "Submitting…";
 
-    try {
-      const resp = await fetch(API_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok || data?.ok !== true) { submitMsg.className = "msg danger"; submitMsg.textContent = "Submission failed. Please try again or book a call."; return; }
-      submitMsg.className = "msg info";
-      submitMsg.textContent = "Success — submitted. We'll email you with next steps shortly.";
-    } catch (err) {
+  const res = computeResult();
+  const rec = computeRecommendation(res.result, res.assessmentRequired);
+
+  // Promote important structured fields to top level
+  const payload = {
+    company,
+    name,
+    email,
+    phone,
+    message: notes,
+    turnstileToken: token,
+
+    // Core classification
+    eligibilityStatus: res.result,
+    assessmentRequired: res.assessmentRequired,
+    recommendedPackage: rec.package,
+    complexityTier: rec.tier,
+    complexityScore: rec.score,
+
+    // High-value SharePoint columns
+    groupStructure: getRadio("groupStructure"),
+    turnoverBand: getRadio("turnoverBand"),
+    tonnageBand: getRadio("tonnageBand"),
+    activitySummary: getChecks("activities").join(", "),
+    dataReadiness: getRadio("totalsReady"),
+    skuBand: getRadio("skuBand"),
+    specQuality: getRadio("specQuality"),
+    hdcInvolvement: getRadio("hdc"),
+    deadlineWindow: getRadio("deadlineWindow"),
+    rpdStatus: getRadio("rpdStatus"),
+    authorisedPerson: getRadio("authorisedPerson"),
+
+    // Full audit trail (for RawPayload column)
+    answers: {
+      ukEstablished: getRadio("ukEstablished"),
+      isCharity: getRadio("isCharity"),
+      reprocessorExporter: getRadio("reprocessorExporter"),
+      groupStructure: getRadio("groupStructure"),
+
+      activities: getChecks("activities"),
+      importBrand: getRadio("importBrand"),
+      importOnBehalf: getRadio("importOnBehalf"),
+      importUKThirdPartyOverseas: getRadio("importUKThirdPartyOverseas"),
+      discardBeforeSell: getRadio("discardBeforeSell"),
+
+      packForUKBrandOwner: getRadio("packForUKBrandOwner"),
+      brandOwnerLarge: getRadio("brandOwnerLarge"),
+      emptyPackagingCustomer: getRadio("emptyPackagingCustomer"),
+
+      turnoverBand: getRadio("turnoverBand"),
+      tonnageBand: getRadio("tonnageBand"),
+      includesTransit: getRadio("includesTransit"),
+
+      deadlineWindow: getRadio("deadlineWindow"),
+      rpdStatus: getRadio("rpdStatus"),
+      authorisedPerson: getRadio("authorisedPerson"),
+      registrationRoute: getRadio("registrationRoute"),
+
+      skuBand: getRadio("skuBand"),
+      packClasses: getChecks("packClasses"),
+      devolved: getRadio("devolved"),
+      hdc: getRadio("hdc"),
+      nationTriggers: getChecks("nationTriggers"),
+
+      totalsReady: getRadio("totalsReady"),
+      specQuality: getRadio("specQuality"),
+      evidenceQuality: getRadio("evidenceQuality"),
+    },
+
+    receivedAt: new Date().toISOString(),
+    source: "Website Quiz v1"
+  };
+
+  try {
+    const resp = await fetch(API_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await resp.json().catch(() => ({}));
+
+    if (!resp.ok || data?.ok !== true) {
       submitMsg.className = "msg danger";
-      submitMsg.textContent = "Network error. Please try again, or book a call.";
+      submitMsg.textContent = "Submission failed. Please try again or book a call.";
+      return;
     }
-  });
+
+    submitMsg.className = "msg info";
+    submitMsg.textContent = "Success — submitted. We’ll email you with next steps shortly.";
+  } catch (err) {
+    submitMsg.className = "msg danger";
+    submitMsg.textContent = "Network error. Please try again, or book a call.";
+  }
+});
 
   // ── INIT ──
   showStep(1, false);
