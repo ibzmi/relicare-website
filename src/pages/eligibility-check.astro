@@ -1401,6 +1401,7 @@
   // 1) Any “assessment required” case
   if (assessmentRequired || result === "ASSESSMENT_REQUIRED") {
     return {
+      package: "assessment",
       packageLabel: PACKAGE_LABELS.assessment,
       tier,
       score,
@@ -1417,6 +1418,7 @@
   // 2) Large producer (you said you focus on small producers)
   if (result === "LIKELY_LARGE") {
     return {
+      package: "assessment",
       packageLabel: PACKAGE_LABELS.assessment, // safest default unless you add a “Quoted separately” choice
       tier,
       score,
@@ -1433,6 +1435,7 @@
   // 3) Not obligated/out of scope/charity exempt → default to assessment as optional paid confirmation
   if (result === "NOT_OBLIGATED" || result === "OUT_OF_SCOPE" || result === "CHARITY_EXEMPT_LIKELY") {
     return {
+      package: "assessment",
       packageLabel: PACKAGE_LABELS.assessment,
       tier,
       score,
@@ -1458,6 +1461,7 @@
   if (formatOnlyEligible) {
     notes.push("You indicated totals and reasonable specs/evidence — a Format & QA pack may be suitable.");
     return {
+      package: "formatQa",
       packageLabel: PACKAGE_LABELS.formatQa,
       tier,
       score,
@@ -1473,6 +1477,7 @@
 
   if (sku === "le25") {
     return {
+      package: "lite",
       packageLabel: PACKAGE_LABELS.lite,
       tier,
       score,
@@ -1485,6 +1490,7 @@
 
   if (sku === "26to75") {
     return {
+      package: "standard",
       packageLabel: PACKAGE_LABELS.standard,
       tier,
       score,
@@ -1497,6 +1503,7 @@
 
   if (sku === "76to150") {
     return {
+      package: "plus",
       packageLabel: PACKAGE_LABELS.plus,
       tier,
       score,
@@ -1510,6 +1517,7 @@
   // gt150 or not_sure → safest: push to assessment (since no “Quoted separately” choice exists)
   notes.push("Your SKU count is high or unclear — we recommend an eligibility assessment before quoting a full pack.");
   return {
+    package: "assessment",
     packageLabel: PACKAGE_LABELS.assessment,
     tier,
     score,
@@ -1586,7 +1594,7 @@
 
   recBox.innerHTML = `
     <div style="margin-bottom:0.75rem;">
-      <span class="result-pill plain">${rec.package.replace(/_/g, " ")}</span>
+      <span class="result-pill plain">${rec.packageLabel}</span>
     </div>
 
     <div class="rec-section">
@@ -1716,6 +1724,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     // Core classification
     eligibilityStatus: res.result,
     assessmentRequired: res.assessmentRequired,
+    recommendedPackage: rec.package,
     recommendedPackageLabel: rec.packageLabel,
     recommendedPackagePrice: rec.priceText,
     complexityTier: rec.tier,
