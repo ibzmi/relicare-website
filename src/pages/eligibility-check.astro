@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-  <style>
+  <style is:global>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -141,18 +141,18 @@
     .progress-wrap {
       margin-bottom: 1.5rem;
     }
-      margin-bottom: 0.4rem;
-    }
+
     .progress-track {
-      height: 4px;
+      height: 6px;                 /* make it a bit more visible */
       background: var(--border);
-      border-radius: 2px;
+      border-radius: 999px;
       overflow: hidden;
     }
+
     .progress-fill {
       height: 100%;
       background: var(--green);
-      border-radius: 2px;
+      border-radius: 999px;
       transition: width 0.4s ease;
     }
 
@@ -278,6 +278,21 @@
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
     }
+
+    /* STEP 4: Align the two side-by-side answer stacks */
+    .two-col-row {
+      align-items: stretch; /* grid default, but make it explicit */
+    }
+
+    .two-col-row .q-block {
+      display: flex;
+      flex-direction: column;
+      height: 100%;         /* allow internal stretching */
+    }
+
+    .two-col-row .q-what {
+      flex: 1;              /* stretch the helper box so both columns align */
+    }
     @media (max-width: 600px) {
       .two-col-row { grid-template-columns: 1fr; }
       .choice-grid.two-col { grid-template-columns: 1fr; }
@@ -401,6 +416,25 @@
       margin-top: 2rem;
       padding-top: 1.5rem;
       border-top: 1px solid var(--border);
+    }
+
+    /* Ensure buttons render consistently across browsers */
+    button.btn-primary,
+    button.btn-secondary,
+    button.btn-ghost,
+    a.btn-primary,
+    a.btn-secondary,
+    a.btn-ghost {
+      appearance: none;
+      -webkit-appearance: none;
+      font: inherit;
+    }
+
+    /* Optional: tidy the result action row */
+    #resultActions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
     }
 
     .btn-primary {
@@ -781,7 +815,7 @@
         <span class="q-label">Packaging tonnage (tonnes)</span>
         <div class="q-what">How many tonnes of packaging you supplied or imported onto the UK market in the previous calendar year. Many organisations undercount by forgetting shipment/tertiary packaging.</div>
         <div class="choice-grid">
-          <label class="choice"><input type="radio" name="tonnageBand" value="le25" /><span class="choice-text"><span class="choice-main">25 tonnes or less</span><span class="choice-hint">If exactly 25 tonnes, choose this option.</span></span></label>
+          <label class="choice"><input type="radio" name="tonnageBand" value="le25" /><span class="choice-text"><span class="choice-main">25 tonnes or less</span></span></label>
           <label class="choice"><input type="radio" name="tonnageBand" value="25to50" /><span class="choice-text"><span class="choice-main">More than 25 and up to 50 tonnes</span></span></label>
           <label class="choice"><input type="radio" name="tonnageBand" value="gt50" /><span class="choice-text"><span class="choice-main">More than 50 tonnes</span></span></label>
           <label class="choice"><input type="radio" name="tonnageBand" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
@@ -898,10 +932,11 @@
       <span class="q-label">Approximate number of SKUs</span>
       <div class="q-what">Distinct products/variants that may have different packaging (size, flavour, bundle, etc).</div>
       <div class="choice-grid two-col">
-        <label class="choice"><input type="radio" name="skuBand" value="1-10" /><span class="choice-text"><span class="choice-main">1–10</span></span></label>
-        <label class="choice"><input type="radio" name="skuBand" value="11-50" /><span class="choice-text"><span class="choice-main">11–50</span></span></label>
-        <label class="choice"><input type="radio" name="skuBand" value="51-200" /><span class="choice-text"><span class="choice-main">51–200</span></span></label>
-        <label class="choice"><input type="radio" name="skuBand" value="200plus" /><span class="choice-text"><span class="choice-main">200+</span></span></label>
+        <label class="choice"><input type="radio" name="skuBand" value="le25" /><span class="choice-text"><span class="choice-main">25 or fewer</span></span></label>
+        <label class="choice"><input type="radio" name="skuBand" value="26to75" /><span class="choice-text"><span class="choice-main">26–75</span></span></label>
+        <label class="choice"><input type="radio" name="skuBand" value="76to150" /><span class="choice-text"><span class="choice-main">76–150</span></span></label>
+        <label class="choice"><input type="radio" name="skuBand" value="gt150" /><span class="choice-text"><span class="choice-main">More than 150</span></span></label>
+        <label class="choice"><input type="radio" name="skuBand" value="not_sure" /><span class="choice-text"><span class="choice-main">Not sure</span></span></label>
       </div>
     </div>
 
@@ -1271,79 +1306,214 @@
   }
 
   function computeRecommendation(result, assessmentRequired) {
-    const notes = [], addOns = [];
-    let score = 0;
-    const deadlineWindow = getRadio("deadlineWindow"), rpdStatus = getRadio("rpdStatus"), authorisedPerson = getRadio("authorisedPerson");
-    let timingRisk = null;
+  const notes = [], addOns = [];
+  let score = 0;
 
-    if (["before_april","before_october","asap","not_sure"].includes(deadlineWindow) && ["no","not_sure"].includes(rpdStatus)) {
-      timingRisk = "You may be time-blocked: RPD account approval can take up to 28 days. Start that process immediately.";
-      score += 2;
-    }
-    if (authorisedPerson === "no" || authorisedPerson === "not_sure") { addOns.push("Account setup may need an authorised person (director/company secretary/partner/LLP member/sole trader)."); score += 2; }
+  const deadlineWindow = getRadio("deadlineWindow"),
+        rpdStatus = getRadio("rpdStatus"),
+        authorisedPerson = getRadio("authorisedPerson");
 
-    const sku = getRadio("skuBand");
-    if (sku === "1-10") score += 1; else if (sku === "11-50") score += 2; else if (sku === "51-200") score += 3; else if (sku === "200plus") score += 4;
+  let timingRisk = null;
 
-    const packClasses = getChecks("packClasses");
-    if (packClasses.includes("not_sure")) score += 2; else score += Math.max(0, packClasses.length - 1);
+  // SharePoint choice labels (MUST match exactly)
+  const PACKAGE_LABELS = {
+    assessment: "Paid Eligibility Assessment",
+    formatQa: "Format & QA Submission Pack",
+    lite: "Full Submission Pack — Lite (≤ 25 SKUs)",
+    standard: "Full Submission Pack — Standard (26–75 SKUs)",
+    plus: "Full Submission Pack — Plus (76–150 SKUs)",
+    retainer: "Retainer",
+  };
 
-    const devolved = getRadio("devolved");
-    if (devolved === "yes" || devolved === "not_sure") score += 1;
-
-    const hdc = getRadio("hdc");
-    if (hdc === "yes") { score += 1; addOns.push("Household drinks containers reporting likely applies."); }
-    if (hdc === "not_sure") { score += 1; addOns.push("Drinks containers status unclear (may affect reporting)."); }
-
-    const nationTriggers = getChecks("nationTriggers");
-    if (nationTriggers.length) { score += 1; addOns.push("Nation data / extra reporting checks may apply."); }
-
-    const totalsReady = getRadio("totalsReady");
-    if (totalsReady === "no" || totalsReady === "not_sure") score += 2;
-
-    const spec = getRadio("specQuality");
-    if (spec === "medium") score += 1; else if (spec === "low" || spec === "not_sure") score += 2;
-
-    const evidence = getRadio("evidenceQuality");
-    if (evidence === "some") score += 1; else if (evidence === "no" || evidence === "not_sure") score += 2;
-
-    const includesTransit = getRadio("includesTransit");
-    if (includesTransit === "no" || includesTransit === "not_sure") { addOns.push("Your tonnage may be understated if shipping/transit packaging is missing."); score += 1; }
-
-    const acts = getChecks("activities");
-    if (acts.includes("hire_loan")) score += 2;
-    if (acts.includes("import")) score += 1;
-    if (acts.includes("empty_packaging")) score += 1;
-    if (acts.includes("third_party_under_brand")) { score += 1; addOns.push("Third-party manufacture/packing/import under your brand may require supplier chasing and stronger evidence."); }
-
-    let tier = "Low";
-    if (score >= 6 && score <= 9) tier = "Medium";
-    if (score >= 10) tier = "High";
-
-    if (assessmentRequired || result === "ASSESSMENT_REQUIRED") {
-      return { package: "ELIGIBILITY_ASSESSMENT", tier, score, addOns, timingRisk, notes: ["Based on your answers, we cannot safely confirm eligibility via automation.", "We recommend an eligibility assessment so your position is defensible."], priceText: PRICES.assessment };
-    }
-    if (result === "LIKELY_LARGE") {
-      return { package: "NOT_SUPPORTED", tier, score, addOns, timingRisk, notes: ["Based on your answers, you're likely a Large Producer.", "We currently focus on Small Producers. We can refer you or provide next steps."], priceText: "Not currently supported (we can still respond with next steps)" };
-    }
-    if (result === "NOT_OBLIGATED" || result === "OUT_OF_SCOPE" || result === "CHARITY_EXEMPT_LIKELY") {
-      return { package: "ELIGIBILITY_ASSESSMENT", tier, score, addOns, timingRisk, notes: ["You're likely not required to take action based on the thresholds you selected.", "If you want reassurance, an eligibility assessment is the safest option."], priceText: PRICES.assessment };
-    }
-
-    const formatOnlyEligible = totalsReady === "yes" && (spec === "high" || spec === "medium") && (evidence === "yes" || evidence === "some") && tier === "Low" && !acts.includes("hire_loan") && !nationTriggers.includes("not_sure");
-
-    if (formatOnlyEligible) {
-      notes.push("You indicated totals and reasonable specs/evidence — format-only may be suitable.");
-      return { package: "FORMAT_ONLY", tier, score, notes, addOns, timingRisk, priceText: PRICES.formatOnly };
-    }
-
-    notes.push("A full preparation pack is recommended based on complexity/risk factors.");
-    let priceText = PRICES.fullLow;
-    if (tier === "Medium") priceText = PRICES.fullMedium;
-    if (tier === "High") priceText = PRICES.fullHigh;
-
-    return { package: "FULL_PACK_" + tier.toUpperCase(), tier, score, notes, addOns, timingRisk, priceText };
+  // Timing risk
+  if (["before_april","before_october","asap","not_sure"].includes(deadlineWindow) &&
+      ["no","not_sure"].includes(rpdStatus)) {
+    timingRisk = "You may be time-blocked: RPD account approval can take up to 28 days. Start that process immediately.";
+    score += 2;
   }
+
+  if (authorisedPerson === "no" || authorisedPerson === "not_sure") {
+    addOns.push("Account setup may need an authorised person (director/company secretary/partner/LLP member/sole trader).");
+    score += 2;
+  }
+
+  // Complexity scoring
+  const sku = getRadio("skuBand");
+  // NEW expected SKU values: le25, 26to75, 76to150, gt150, not_sure
+  if (sku === "le25") score += 1;
+  else if (sku === "26to75") score += 2;
+  else if (sku === "76to150") score += 3;
+  else if (sku === "gt150") score += 4;
+  else if (sku === "not_sure") score += 3; // uncertainty penalty
+
+  const packClasses = getChecks("packClasses");
+  if (packClasses.includes("not_sure")) score += 2;
+  else score += Math.max(0, packClasses.length - 1);
+
+  const devolved = getRadio("devolved");
+  if (devolved === "yes" || devolved === "not_sure") score += 1;
+
+  const hdc = getRadio("hdc");
+  if (hdc === "yes") { score += 1; addOns.push("Household drinks containers reporting likely applies."); }
+  if (hdc === "not_sure") { score += 1; addOns.push("Drinks containers status unclear (may affect reporting)."); }
+
+  const nationTriggers = getChecks("nationTriggers");
+  if (nationTriggers.length) { score += 1; addOns.push("Nation data / extra reporting checks may apply."); }
+
+  const totalsReady = getRadio("totalsReady");
+  if (totalsReady === "no" || totalsReady === "not_sure") score += 2;
+
+  const spec = getRadio("specQuality");
+  if (spec === "medium") score += 1;
+  else if (spec === "low" || spec === "not_sure") score += 2;
+
+  const evidence = getRadio("evidenceQuality");
+  if (evidence === "some") score += 1;
+  else if (evidence === "no" || evidence === "not_sure") score += 2;
+
+  const includesTransit = getRadio("includesTransit");
+  if (includesTransit === "no" || includesTransit === "not_sure") {
+    addOns.push("Your tonnage may be understated if shipping/transit packaging is missing.");
+    score += 1;
+  }
+
+  const acts = getChecks("activities");
+  if (acts.includes("hire_loan")) score += 2;
+  if (acts.includes("import")) score += 1;
+  if (acts.includes("empty_packaging")) score += 1;
+  if (acts.includes("third_party_under_brand")) {
+    score += 1;
+    addOns.push("Third-party manufacture/packing/import under your brand may require supplier chasing and stronger evidence.");
+  }
+
+  // Tier labels remain internal; used for messaging only
+  let tier = "Low";
+  if (score >= 6 && score <= 9) tier = "Medium";
+  if (score >= 10) tier = "High";
+
+  // ── PACKAGE ROUTING ──
+
+  // 1) Any “assessment required” case
+  if (assessmentRequired || result === "ASSESSMENT_REQUIRED") {
+    return {
+      packageLabel: PACKAGE_LABELS.assessment,
+      tier,
+      score,
+      addOns,
+      timingRisk,
+      notes: [
+        "Based on your answers, we cannot safely confirm eligibility via automation.",
+        "We recommend an eligibility assessment so your position is defensible."
+      ],
+      priceText: PRICES.eligibility
+    };
+  }
+
+  // 2) Large producer (you said you focus on small producers)
+  if (result === "LIKELY_LARGE") {
+    return {
+      packageLabel: PACKAGE_LABELS.assessment, // safest default unless you add a “Quoted separately” choice
+      tier,
+      score,
+      addOns,
+      timingRisk,
+      notes: [
+        "Based on your answers, you're likely a Large Producer.",
+        "We currently focus on Small Producers — we can still confirm your position via an assessment."
+      ],
+      priceText: PRICES.eligibility
+    };
+  }
+
+  // 3) Not obligated/out of scope/charity exempt → default to assessment as optional paid confirmation
+  if (result === "NOT_OBLIGATED" || result === "OUT_OF_SCOPE" || result === "CHARITY_EXEMPT_LIKELY") {
+    return {
+      packageLabel: PACKAGE_LABELS.assessment,
+      tier,
+      score,
+      addOns,
+      timingRisk,
+      notes: [
+        "You're likely not required to take action based on the thresholds you selected.",
+        "If you want reassurance, an eligibility assessment is the safest option."
+      ],
+      priceText: PRICES.eligibility
+    };
+  }
+
+  // 4) Format & QA eligibility (your existing rule, renamed)
+  const formatOnlyEligible =
+    totalsReady === "yes" &&
+    (spec === "high" || spec === "medium") &&
+    (evidence === "yes" || evidence === "some") &&
+    tier === "Low" &&
+    !acts.includes("hire_loan") &&
+    !nationTriggers.includes("not_sure");
+
+  if (formatOnlyEligible) {
+    notes.push("You indicated totals and reasonable specs/evidence — a Format & QA pack may be suitable.");
+    return {
+      packageLabel: PACKAGE_LABELS.formatQa,
+      tier,
+      score,
+      notes,
+      addOns,
+      timingRisk,
+      priceText: PRICES.formatQa
+    };
+  }
+
+  // 5) Full Submission Pack tiered by SKU range
+  notes.push("A full submission pack is recommended based on complexity/risk factors.");
+
+  if (sku === "le25") {
+    return {
+      packageLabel: PACKAGE_LABELS.lite,
+      tier,
+      score,
+      notes,
+      addOns,
+      timingRisk,
+      priceText: PRICES.fullLite
+    };
+  }
+
+  if (sku === "26to75") {
+    return {
+      packageLabel: PACKAGE_LABELS.standard,
+      tier,
+      score,
+      notes,
+      addOns,
+      timingRisk,
+      priceText: PRICES.fullStandard
+    };
+  }
+
+  if (sku === "76to150") {
+    return {
+      packageLabel: PACKAGE_LABELS.plus,
+      tier,
+      score,
+      notes,
+      addOns,
+      timingRisk,
+      priceText: PRICES.fullPlus
+    };
+  }
+
+  // gt150 or not_sure → safest: push to assessment (since no “Quoted separately” choice exists)
+  notes.push("Your SKU count is high or unclear — we recommend an eligibility assessment before quoting a full pack.");
+  return {
+    packageLabel: PACKAGE_LABELS.assessment,
+    tier,
+    score,
+    notes,
+    addOns,
+    timingRisk,
+    priceText: PRICES.eligibility
+  };
+}
 
   // ── RENDER RESULT ──
   function renderResult() {
@@ -1391,39 +1561,47 @@
 
   // ── RENDER RECOMMENDATION ──
   function renderRecommendation() {
-    const recBox = document.getElementById("recBox");
-    const res = computeResult();
-    const rec = computeRecommendation(res.result, res.assessmentRequired);
+  const recBox = document.getElementById("recBox");
+  const res = computeResult();
+  const rec = computeRecommendation(res.result, res.assessmentRequired);
 
-    const addOnsHtml = rec.addOns.length
-      ? `<ul class="rec-list">${rec.addOns.map(x => `<li>${x}</li>`).join("")}</ul>`
-      : `<p style="font-size:0.85rem;color:var(--ink-faint);">None flagged.</p>`;
+  // Keep them for internal use (optional, but handy)
+  recBox.dataset.tier = rec.tier;
+  recBox.dataset.score = String(rec.score);
+  recBox.dataset.package = rec.package;
 
-    const notesHtml = `<ul class="rec-list">${rec.notes.map(x => `<li>${x}</li>`).join("")}</ul>`;
-    const timingHtml = rec.timingRisk ? `<div class="msg warn" style="margin-top:1rem;"><strong>Timing risk</strong>${rec.timingRisk}</div>` : "";
+  const addOnsHtml = rec.addOns.length
+    ? `<ul class="rec-list">${rec.addOns.map(x => `<li>${x}</li>`).join("")}</ul>`
+    : `<p style="font-size:0.85rem;color:var(--ink-faint);">None flagged.</p>`;
 
-    recBox.innerHTML = `
-      <div style="margin-bottom:0.75rem;">
-        <span class="result-pill plain">${rec.package.replace(/_/g, " ")}</span>
-        <span class="result-pill plain">Tier: ${rec.tier}</span>
-        <span class="result-pill plain">Complexity score: ${rec.score}</span>
-      </div>
-      <div class="rec-section">
-        <div class="rec-section-label">What this means</div>
-        ${notesHtml}
-        ${timingHtml}
-      </div>
-      <div class="rec-section">
-        <div class="rec-section-label">Add-ons / flags</div>
-        ${addOnsHtml}
-      </div>
-      <div class="price-box">
-        <span class="price-box-label">Indicative price</span>
-        <span class="price-box-value">${rec.priceText}</span>
-        <span class="price-box-note">+ VAT where not stated</span>
-      </div>
-    `;
-  }
+  const notesHtml = `<ul class="rec-list">${rec.notes.map(x => `<li>${x}</li>`).join("")}</ul>`;
+  const timingHtml = rec.timingRisk
+    ? `<div class="msg warn" style="margin-top:1rem;"><strong>Timing risk</strong>${rec.timingRisk}</div>`
+    : "";
+
+  recBox.innerHTML = `
+    <div style="margin-bottom:0.75rem;">
+      <span class="result-pill plain">${rec.package.replace(/_/g, " ")}</span>
+    </div>
+
+    <div class="rec-section">
+      <div class="rec-section-label">What this means</div>
+      ${notesHtml}
+      ${timingHtml}
+    </div>
+
+    <div class="rec-section">
+      <div class="rec-section-label">Add-ons / flags</div>
+      ${addOnsHtml}
+    </div>
+
+    <div class="price-box">
+      <span class="price-box-label">Indicative price</span>
+      <span class="price-box-value">${rec.priceText}</span>
+      <span class="price-box-note">+ VAT where not stated</span>
+    </div>
+  `;
+}
 
   // ── CLICK HANDLER ──
   document.addEventListener("click", e => {
@@ -1533,7 +1711,8 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     // Core classification
     eligibilityStatus: res.result,
     assessmentRequired: res.assessmentRequired,
-    recommendedPackage: rec.package,
+    recommendedPackageLabel: rec.packageLabel,
+    recommendedPackagePrice: rec.priceText,
     complexityTier: rec.tier,
     complexityScore: rec.score,
 
