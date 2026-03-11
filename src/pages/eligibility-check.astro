@@ -1583,6 +1583,35 @@
   recBox.dataset.score = String(rec.score);
   recBox.dataset.package = rec.package;
 
+  let packageDescriptionItems = [];
+  if (rec.package === "assessment") {
+    packageDescriptionItems = [
+      "30–45 min call + written routing outcome (in scope / out of scope / needs more detail).",
+      "Credited against a Full Submission Pack if they proceed within 14 days."
+    ];
+  } else if (rec.package === "formatQa") {
+    packageDescriptionItems = [
+      "Client already has clean totals/weights.",
+      "We format to the file spec.",
+      "Run the QA gate.",
+      "Export the upload-ready CSV.",
+      "Support the submission upload on a call."
+    ];
+  } else if (["lite", "standard", "plus"].includes(rec.package)) {
+    packageDescriptionItems = [
+      "We build a packaging BOM.",
+      "Chase specs (up to 2 suppliers + 1 3PL).",
+      "Aggregate totals.",
+      "Produce the upload-ready CSV.",
+      "Create the evidence/assumptions summary.",
+      "Support submission."
+    ];
+  }
+
+  const packageDescriptionHtml = packageDescriptionItems.length > 0 
+    ? `<ul class="rec-list" style="margin-top:1rem;">${packageDescriptionItems.map(item => `<li>${item}</li>`).join("")}</ul>`
+    : "";
+
   const addOnsHtml = rec.addOns.length
     ? `<ul class="rec-list">${rec.addOns.map(x => `<li>${x}</li>`).join("")}</ul>`
     : `<p style="font-size:0.85rem;color:var(--ink-faint);">None flagged.</p>`;
@@ -1595,6 +1624,7 @@
   recBox.innerHTML = `
     <div style="margin-bottom:0.75rem;">
       <span class="result-pill plain">${rec.packageLabel}</span>
+      ${packageDescriptionHtml}
     </div>
 
     <div class="rec-section">
@@ -1689,11 +1719,18 @@
 document.getElementById("submitBtn").addEventListener("click", async () => {
   clearGlobalMsg();
 
-  const company = document.getElementById("contactCompany").value.trim();
-  const name    = document.getElementById("contactName").value.trim();
-  const email   = document.getElementById("contactEmail").value.trim();
-  const phone   = document.getElementById("contactPhone").value.trim();
-  const notes   = document.getElementById("contactNotes").value.trim();
+  function escapeHTML(str) {
+    if (!str) return "";
+    return str.replace(/[&<>'"]/g, tag => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag]));
+  }
+
+  const company = escapeHTML(document.getElementById("contactCompany").value.trim());
+  const name    = escapeHTML(document.getElementById("contactName").value.trim());
+  const email   = escapeHTML(document.getElementById("contactEmail").value.trim());
+  const phone   = escapeHTML(document.getElementById("contactPhone").value.trim());
+  const notes   = escapeHTML(document.getElementById("contactNotes").value.trim());
 
   if (!company || !name || !email) {
     return setGlobalMsg("warn", "Please fill in Company, Name, and Email.");
@@ -1723,7 +1760,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
 
     // Core classification
     eligibilityStatus: res.result,
-    assessmentRequired: res.assessmentRequired,
+    assessmentRequired: res.assessmentRequired ? "Yes" : "No",
     recommendedPackage: rec.package,
     recommendedPackageLabel: rec.packageLabel,
     recommendedPackagePrice: rec.priceText,
@@ -1738,7 +1775,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     dataReadiness: getRadio("totalsReady"),
     skuBand: getRadio("skuBand"),
     specQuality: getRadio("specQuality"),
-    hdcInvolvement: getRadio("hdc"),
+    hdcInvolvement: getRadio("hdc") === "yes" ? "Yes" : (getRadio("hdc") === "no" ? "No" : "Not sure"),
     deadlineWindow: getRadio("deadlineWindow"),
     rpdStatus: getRadio("rpdStatus"),
     authorisedPerson: getRadio("authorisedPerson"),
