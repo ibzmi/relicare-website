@@ -1760,7 +1760,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
 
     // Core classification
     eligibilityStatus: res.result,
-    assessmentRequired: res.assessmentRequired ? "Yes" : "No",
+    assessmentRequired: Boolean(res.assessmentRequired),
     recommendedPackage: rec.package,
     recommendedPackageLabel: rec.packageLabel,
     recommendedPackagePrice: rec.priceText,
@@ -1775,7 +1775,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     dataReadiness: getRadio("totalsReady"),
     skuBand: getRadio("skuBand"),
     specQuality: getRadio("specQuality"),
-    hdcInvolvement: getRadio("hdc") === "yes" ? "Yes" : (getRadio("hdc") === "no" ? "No" : "Not sure"),
+    hdcInvolvement: getRadio("hdc"),
     deadlineWindow: getRadio("deadlineWindow"),
     rpdStatus: getRadio("rpdStatus"),
     authorisedPerson: getRadio("authorisedPerson"),
