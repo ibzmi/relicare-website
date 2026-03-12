@@ -1719,18 +1719,11 @@
 document.getElementById("submitBtn").addEventListener("click", async () => {
   clearGlobalMsg();
 
-  function escapeHTML(str) {
-    if (!str) return "";
-    return str.replace(/[&<>'"]/g, tag => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-    }[tag]));
-  }
-
-  const company = escapeHTML(document.getElementById("contactCompany").value.trim());
-  const name    = escapeHTML(document.getElementById("contactName").value.trim());
-  const email   = escapeHTML(document.getElementById("contactEmail").value.trim());
-  const phone   = escapeHTML(document.getElementById("contactPhone").value.trim());
-  const notes   = escapeHTML(document.getElementById("contactNotes").value.trim());
+  const company = document.getElementById("contactCompany").value.trim();
+  const name    = document.getElementById("contactName").value.trim();
+  const email   = document.getElementById("contactEmail").value.trim();
+  const phone   = document.getElementById("contactPhone").value.trim();
+  const notes   = document.getElementById("contactNotes").value.trim();
 
   if (!company || !name || !email) {
     return setGlobalMsg("warn", "Please fill in Company, Name, and Email.");
