@@ -1587,7 +1587,7 @@
   if (rec.package === "assessment") {
     packageDescriptionItems = [
       "30–45 min call + written routing outcome (in scope / out of scope / needs more detail).",
-      "Credited against a Full Submission Pack if they proceed within 14 days."
+      "Credited against a Full Submission Pack if they proceed within 30 days."
     ];
   } else if (rec.package === "formatQa") {
     packageDescriptionItems = [
@@ -1768,7 +1768,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     dataReadiness: getRadio("totalsReady"),
     skuBand: getRadio("skuBand"),
     specQuality: getRadio("specQuality"),
-    hdcInvolvement: getRadio("hdc"),
+    hdcInvolvement: getRadio("hdc") === "yes",
     deadlineWindow: getRadio("deadlineWindow"),
     rpdStatus: getRadio("rpdStatus"),
     authorisedPerson: getRadio("authorisedPerson"),
