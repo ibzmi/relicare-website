@@ -1,0 +1,270 @@
+---
+// src/pages/terms.astro
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terms of Use | Relicare</title>
+  <meta name="description" content="Terms governing your use of relicareuk.com, operated by Relicare Ltd." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0f1a14;
+      --ink-muted:  #4a5c50;
+      --ink-faint:  #8a9e90;
+      --paper:      #f5f2eb;
+      --paper-warm: #ede9df;
+      --green:      #1a6640;
+      --green-light:#2d8a58;
+      --green-pale: #e8f2ec;
+      --accent:     #c8602a;
+      --border:     #d4cec2;
+      --white:      #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(245,242,235,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--green);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--ink-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+    .nav-cta {
+      background: var(--green) !important;
+      color: var(--white) !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      font-weight: 600 !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--green-light) !important; }
+
+    /* ARTICLE LAYOUT */
+    .article-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 120px 2rem 5rem;
+    }
+    .article-wrap h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+    }
+    .article-intro {
+      font-size: 1rem;
+      color: var(--ink-muted);
+      line-height: 1.7;
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+    }
+    .article-updated {
+      font-size: 0.82rem;
+      color: var(--ink-faint);
+      margin-bottom: 2.5rem;
+    }
+    .article-wrap h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .article-wrap p {
+      font-size: 0.9375rem;
+      color: var(--ink-muted);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+      font-weight: 300;
+    }
+    .article-wrap p strong { color: var(--ink); font-weight: 600; }
+    .article-wrap ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 0.75rem 0 1rem;
+    }
+    .article-wrap ul li {
+      position: relative;
+      padding-left: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--ink-muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    .article-wrap ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+    .article-wrap ul li strong { color: var(--ink); font-weight: 600; }
+    .article-wrap a { color: var(--green); font-weight: 500; text-decoration: none; }
+    .article-wrap a:hover { text-decoration: underline; }
+
+    /* FOOTER */
+    footer { background: var(--ink); border-top: 1px solid rgba(255,255,255,0.06); padding: 2rem; text-align: center; }
+    footer p { font-size: 0.8rem; color: #4a5c50; line-height: 1.8; }
+    footer a { color: #6daa84; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      .article-wrap { padding: 100px 1.25rem 3.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">Relicare</a>
+  <ul class="nav-links">
+    <li><a href="/#how-it-works">How it works</a></li>
+    <li><a href="/#packages">Pricing</a></li>
+    <li><a href="/explainer">What is EPR?</a></li>
+    <li><a href="/eligibility-check" class="nav-cta">Check eligibility</a></li>
+  </ul>
+</nav>
+<main>
+
+<div class="article-wrap">
+
+  <h1>Website Terms of Use</h1>
+  <p class="article-intro">These Terms of Use govern your access to and use of relicareuk.com and any pages, forms, materials or downloads made available on or through the site.</p>
+  <p class="article-updated">Last updated: March 2026</p>
+
+  <!-- 1 -->
+  <h2>1. Who operates this website</h2>
+  <p>This website is operated by Relicare Ltd, a company registered in England and Wales with company number 17065831. Registered office: Monomark House, 27 Old Gloucester Street, London, WC1N 3AX, United Kingdom. Contact: <a href="mailto:hello@relicareuk.com">hello@relicareuk.com</a>.</p>
+
+  <!-- 2 -->
+  <h2>2. Purpose of the website</h2>
+  <p>The website provides general information about Relicare&rsquo;s services and lets users enquire, complete an eligibility quiz, and request contact. It is aimed at businesses and professionals, not consumers acting in a personal capacity.</p>
+
+  <!-- 3 -->
+  <h2>3. No legal advice / no compliance scheme</h2>
+  <p>Nothing on this website constitutes legal advice, regulated professional advice, or a binding determination of your legal obligations. Relicare is an independent specialist service provider. Relicare is not a registered compliance scheme and does not claim scheme status.</p>
+
+  <!-- 4 -->
+  <h2>4. No reliance / no contract from site use</h2>
+  <p>You may use the website to understand our services and contact us, but you should not rely on the website or quiz output as a substitute for your own professional advice or internal review. No contract for services is formed simply by using the website, submitting a form, booking a call, or receiving a quiz result. Any services are supplied only under a separately agreed statement of work or equivalent engagement terms.</p>
+
+  <!-- 5 -->
+  <h2>5. Acceptable use</h2>
+  <ul>
+    <li>Do not misuse the website, attempt to gain unauthorised access, upload malicious code, or interfere with the site&rsquo;s operation.</li>
+    <li>Do not submit false, misleading, unlawful or infringing content.</li>
+    <li>Do not upload personal data or customer-level order data unless we specifically ask for it and explain why.</li>
+  </ul>
+
+  <!-- 6 -->
+  <h2>6. Intellectual property</h2>
+  <p>Unless stated otherwise, the content, branding, copy, and materials on the site belong to Relicare or its licensors. You may view and print pages for your own internal business use, but you may not reproduce, republish, distribute or exploit the content commercially without permission.</p>
+
+  <!-- 7 -->
+  <h2>7. Third-party links and services</h2>
+  <p>The website may include links to third-party services such as scheduling, form, hosting or payment tools. We are not responsible for third-party content, policies or service availability.</p>
+
+  <!-- 8 -->
+  <h2>8. Site availability</h2>
+  <p>We try to keep the website accurate and available, but we do not guarantee that it will always be uninterrupted, secure, error-free or up to date.</p>
+
+  <!-- 9 -->
+  <h2>9. Liability</h2>
+  <p>To the fullest extent permitted by law, Relicare excludes liability for loss arising from use of or reliance on the website or quiz output. Nothing in these terms excludes liability that cannot lawfully be excluded.</p>
+
+  <!-- 10 -->
+  <h2>10. Privacy and cookies</h2>
+  <p>Your use of the website is also subject to our <a href="/privacy">Privacy Notice</a> and Cookies Policy.</p>
+
+  <!-- 11 -->
+  <h2>11. Changes to these terms</h2>
+  <p>We may update these terms from time to time. The version published on the website at the relevant time will apply.</p>
+
+  <!-- 12 -->
+  <h2>12. Governing law</h2>
+  <p>These terms are governed by the laws of England and Wales, and the courts of England and Wales will have non-exclusive jurisdiction unless mandatory law requires otherwise.</p>
+
+</div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p style="margin-bottom:0.75rem;font-size:0.75rem;color:#6a7d70;">
+    Relicare Ltd is a company registered in England and Wales with company number 17065831. Registered office: Monomark House, 27 Old Gloucester Street, London, WC1N 3AX, United Kingdom. Contact: <a href="mailto:hello@relicareuk.com">hello@relicareuk.com</a>.
+  </p>
+  <p>
+    &copy; 2026 Relicare &mdash; UK Packaging EPR Submission Specialists<br />
+    <a href="/">Home</a> &middot;
+    <a href="/explainer">What is EPR?</a> &middot;
+    <a href="/eligibility-check">Eligibility checker</a> &middot;
+    <a href="/#packages">Pricing</a> &middot;
+    <a href="/privacy">Privacy Notice</a> &middot;
+    <a href="/terms">Terms of Use</a>
+  </p>
+  <p style="margin-top:0.75rem;font-size:0.75rem;color:#2a3a30;">
+    We are an independent specialist service provider. We are not a registered compliance scheme. We do not provide legal advice.
+  </p>
+</footer>
+
+</body>
+</html>

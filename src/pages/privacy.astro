@@ -1,0 +1,337 @@
+---
+// src/pages/privacy.astro
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Notice | Relicare</title>
+  <meta name="description" content="How Relicare Ltd collects, uses and stores your personal data. Read our full privacy notice." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #0f1a14;
+      --ink-muted:  #4a5c50;
+      --ink-faint:  #8a9e90;
+      --paper:      #f5f2eb;
+      --paper-warm: #ede9df;
+      --green:      #1a6640;
+      --green-light:#2d8a58;
+      --green-pale: #e8f2ec;
+      --accent:     #c8602a;
+      --border:     #d4cec2;
+      --white:      #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(245,242,235,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--green);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--ink-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+    .nav-cta {
+      background: var(--green) !important;
+      color: var(--white) !important;
+      padding: 0.5rem 1.2rem;
+      border-radius: 4px;
+      font-weight: 600 !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: var(--green-light) !important; }
+
+    /* ARTICLE LAYOUT */
+    .article-wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 120px 2rem 5rem;
+    }
+    .article-wrap h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 0.75rem;
+    }
+    .article-intro {
+      font-size: 1rem;
+      color: var(--ink-muted);
+      line-height: 1.7;
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+    }
+    .article-updated {
+      font-size: 0.82rem;
+      color: var(--ink-faint);
+      margin-bottom: 2.5rem;
+    }
+    .article-wrap h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .article-wrap p {
+      font-size: 0.9375rem;
+      color: var(--ink-muted);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+      font-weight: 300;
+    }
+    .article-wrap p strong { color: var(--ink); font-weight: 600; }
+    .article-wrap ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 0.75rem 0 1rem;
+    }
+    .article-wrap ul li {
+      position: relative;
+      padding-left: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--ink-muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    .article-wrap ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+    }
+    .article-wrap ul li strong { color: var(--ink); font-weight: 600; }
+    .article-wrap a { color: var(--green); font-weight: 500; text-decoration: none; }
+    .article-wrap a:hover { text-decoration: underline; }
+
+    /* TABLE */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1.25rem 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    thead th {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 0.7rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.02em;
+    }
+    tbody tr:nth-child(odd)  { background: var(--white); }
+    tbody tr:nth-child(even) { background: var(--paper); }
+    tbody td {
+      padding: 0.7rem 1rem;
+      color: var(--ink-muted);
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+      font-size: 0.875rem;
+      font-weight: 300;
+    }
+    tbody td strong { color: var(--ink); font-weight: 600; }
+
+    /* FOOTER */
+    footer { background: var(--ink); border-top: 1px solid rgba(255,255,255,0.06); padding: 2rem; text-align: center; }
+    footer p { font-size: 0.8rem; color: #4a5c50; line-height: 1.8; }
+    footer a { color: #6daa84; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+    }
+    @media (max-width: 600px) {
+      .article-wrap { padding: 100px 1.25rem 3.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">Relicare</a>
+  <ul class="nav-links">
+    <li><a href="/#how-it-works">How it works</a></li>
+    <li><a href="/#packages">Pricing</a></li>
+    <li><a href="/explainer">What is EPR?</a></li>
+    <li><a href="/eligibility-check" class="nav-cta">Check eligibility</a></li>
+  </ul>
+</nav>
+<main>
+
+<div class="article-wrap">
+
+  <h1>Privacy Notice</h1>
+  <p class="article-intro">This Privacy Notice explains how Relicare Ltd (&ldquo;Relicare&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;) uses personal data when you visit relicareuk.com, submit an enquiry or eligibility quiz, book a call, become a client, or otherwise interact with us.</p>
+  <p class="article-updated">Last updated: March 2026</p>
+
+  <!-- 1 -->
+  <h2>1. Who we are</h2>
+  <p>
+    <strong>Relicare Ltd</strong><br />
+    Registered in England and Wales<br />
+    Company number: 17065831<br />
+    Registered office: Monomark House, 27 Old Gloucester Street, London, WC1N 3AX, United Kingdom<br />
+    Public contact email: <a href="mailto:hello@relicareuk.com">hello@relicareuk.com</a>
+  </p>
+  <p>Privacy queries should be sent to <a href="mailto:hello@relicareuk.com">hello@relicareuk.com</a>.</p>
+
+  <!-- 2 -->
+  <h2>2. The personal data we collect</h2>
+  <ul>
+    <li><strong>Identity and contact data:</strong> name, business email, business phone number, job title, company name, and any details you include in an enquiry.</li>
+    <li><strong>Eligibility / quiz data:</strong> turnover band, tonnage band, group structure, activity summary, data readiness, SKU band, HDC involvement, and other routing answers.</li>
+    <li><strong>Operational / onboarding data:</strong> booking details, upload metadata, supplier/3PL contact details you authorise us to use, and project communications.</li>
+    <li><strong>Service-delivery data:</strong> files and records needed to prepare the submission pack, such as aggregated SKU exports, packaging specifications, and evidence/assumption logs. We instruct clients not to upload customer-level order data unless we specifically request it for a justified reason.</li>
+    <li><strong>Technical data:</strong> IP address, browser/device information, and website usage data.</li>
+  </ul>
+
+  <!-- 3 -->
+  <h2>3. How we use personal data</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Purpose</th><th>What this covers</th><th>Lawful basis</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Respond to enquiries and route leads</strong></td>
+          <td>Assessing likely fit, replying to website/contact submissions, arranging calls, preparing quotes, and deciding the likely package route</td>
+          <td>Legitimate interests; and, where you are acting personally and request a service, steps at your request before entering a contract</td>
+        </tr>
+        <tr>
+          <td><strong>Deliver and administer the service</strong></td>
+          <td>Onboarding, file handling, supplier/3PL contact (with client permission), preparing deliverables, submission support, and client communications</td>
+          <td>Legitimate interests; contract where applicable</td>
+        </tr>
+        <tr>
+          <td><strong>Billing, accounts, compliance and record-keeping</strong></td>
+          <td>Invoicing, payments, tax/accounting records, fraud prevention, legal claims, and company compliance obligations</td>
+          <td>Legal obligation; legitimate interests</td>
+        </tr>
+        <tr>
+          <td><strong>Website security and operation</strong></td>
+          <td>Keeping the website secure, troubleshooting, preventing abuse, and maintaining service functionality</td>
+          <td>Legitimate interests</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4 -->
+  <h2>4. Recipients and processors</h2>
+  <p>We may share personal data with the following categories of recipient:</p>
+  <ul>
+    <li>Microsoft 365 / SharePoint / OneDrive for file storage, collaboration and operational workflow.</li>
+    <li>Website, forms, and automation providers used to run the site, capture leads, and book calls.</li>
+    <li>Accounting, invoicing, banking and payment providers used to administer the business.</li>
+    <li>Professional advisers (for example accountants, insurers, solicitors) where reasonably necessary.</li>
+    <li>Public authorities, regulators, law enforcement, courts or other third parties where required by law or to establish, exercise or defend legal claims.</li>
+    <li>Supplier and 3PL contacts only where a client has authorised us to request packaging specifications or related information.</li>
+  </ul>
+
+  <!-- 5 -->
+  <h2>5. International transfers</h2>
+  <p>Some service providers may process data outside the UK. Where that happens, we will use appropriate safeguards recognised under UK data protection law, such as adequacy regulations or contractual safeguards, as applicable.</p>
+
+  <!-- 6 -->
+  <h2>6. How long we keep personal data</h2>
+  <ul>
+    <li><strong>Enquiry / quiz data</strong> for leads that do not become clients: normally up to 12 months from the last meaningful contact.</li>
+    <li><strong>Booked-call and proposal records:</strong> normally up to 12 months from the last meaningful contact if no engagement starts.</li>
+    <li><strong>Client project files, invoices, payment records, and key delivery records:</strong> normally 7 years from the end of the relevant financial year or project close, whichever is later.</li>
+  </ul>
+
+  <!-- 7 -->
+  <h2>7. Your rights</h2>
+  <p>You may have rights to access, correct, erase, restrict, or object to certain processing of your personal data, depending on the circumstances. To exercise any right, contact <a href="mailto:hello@relicareuk.com">hello@relicareuk.com</a>.</p>
+  <p>You also have the right to complain to the Information Commissioner&rsquo;s Office (ICO) at <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">ico.org.uk</a>.</p>
+
+  <!-- 8 -->
+  <h2>8. Cookies</h2>
+  <p>This website uses only strictly necessary cookies needed to provide core functionality and security. We do not use non-essential analytics or advertising cookies. Because these cookies are necessary, they do not require your consent.</p>
+
+  <!-- 9 -->
+  <h2>9. Contact us</h2>
+  <p>For privacy questions or requests, contact <a href="mailto:hello@relicareuk.com">hello@relicareuk.com</a>.</p>
+
+</div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p style="margin-bottom:0.75rem;font-size:0.75rem;color:#6a7d70;">
+    Relicare Ltd is a company registered in England and Wales with company number 17065831. Registered office: Monomark House, 27 Old Gloucester Street, London, WC1N 3AX, United Kingdom. Contact: <a href="mailto:hello@relicareuk.com">hello@relicareuk.com</a>.
+  </p>
+  <p>
+    &copy; 2026 Relicare &mdash; UK Packaging EPR Submission Specialists<br />
+    <a href="/">Home</a> &middot;
+    <a href="/explainer">What is EPR?</a> &middot;
+    <a href="/eligibility-check">Eligibility checker</a> &middot;
+    <a href="/#packages">Pricing</a> &middot;
+    <a href="/privacy">Privacy Notice</a> &middot;
+    <a href="/terms">Terms of Use</a>
+  </p>
+  <p style="margin-top:0.75rem;font-size:0.75rem;color:#2a3a30;">
+    We are an independent specialist service provider. We are not a registered compliance scheme. We do not provide legal advice.
+  </p>
+</footer>
+
+</body>
+</html>
